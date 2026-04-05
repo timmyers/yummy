@@ -23,6 +23,26 @@ const REMINDER_MESSAGES = [
   "A little nourishment goes a long way 💖",
 ];
 
+// ===== Achievements Definitions =====
+
+const ACHIEVEMENTS = [
+  // Eating consistency
+  { id: 'first_bloom', name: 'First Bloom', emoji: '🌱', hint: 'Log your first meal', category: 'consistency', bg: '#FFF0F5', glow: 'rgba(255,107,157,0.2)' },
+  { id: 'garden_starter', name: 'Garden Starter', emoji: '🌿', hint: 'Log 5 meals', category: 'consistency', bg: '#F0FFF0', glow: 'rgba(107,203,119,0.2)' },
+  { id: 'budding_gardener', name: 'Budding Gardener', emoji: '🌷', hint: 'Log 15 meals', category: 'consistency', bg: '#FFF0F8', glow: 'rgba(247,131,172,0.2)' },
+  { id: 'green_thumb', name: 'Green Thumb', emoji: '🌻', hint: 'Log 50 meals', category: 'consistency', bg: '#FFFFF0', glow: 'rgba(255,217,61,0.2)' },
+  { id: 'master_gardener', name: 'Master Gardener', emoji: '👑', hint: 'Log 100 meals', category: 'consistency', bg: '#FFF8F0', glow: 'rgba(255,160,122,0.2)' },
+  // Streak-based
+  { id: 'sunshine_day', name: 'Sunshine Day', emoji: '☀️', hint: '1 day streak', category: 'streak', bg: '#FFFDE8', glow: 'rgba(255,217,61,0.2)' },
+  { id: 'week_of_wellness', name: 'Week of Wellness', emoji: '🌈', hint: '7 day streak', category: 'streak', bg: '#F0F0FF', glow: 'rgba(177,151,252,0.2)' },
+  { id: 'fortnight_flora', name: 'Fortnight Flora', emoji: '🌺', hint: '14 day streak', category: 'streak', bg: '#FFF0F5', glow: 'rgba(255,107,157,0.2)' },
+  { id: 'monthly_bloom', name: 'Monthly Bloom', emoji: '💐', hint: '30 day streak', category: 'streak', bg: '#F8F0FF', glow: 'rgba(177,151,252,0.25)' },
+  // Variety
+  { id: 'rainbow_plate', name: 'Rainbow Plate', emoji: '🌈', hint: '5 different meals in one day', category: 'variety', bg: '#F0F8FF', glow: 'rgba(116,192,252,0.2)' },
+  { id: 'early_bird', name: 'Early Bird', emoji: '🐦', hint: 'Log a meal before 9am', category: 'variety', bg: '#FFF8E8', glow: 'rgba(255,200,0,0.2)' },
+  { id: 'night_owl', name: 'Night Owl Nourisher', emoji: '🦉', hint: 'Log a meal after 8pm', category: 'variety', bg: '#F0F0FF', glow: 'rgba(140,120,200,0.2)' },
+];
+
 const CONTEXTUAL_PROMPTS = {
   morning_no_meals: "Start your day with something nourishing! 🌅",
   afternoon_no_meals: "Don't forget to eat, beautiful! Your garden is waiting 🌷",
@@ -38,7 +58,7 @@ function loadData() {
   } catch (e) {
     console.error('Failed to load data:', e);
   }
-  return { meals: {}, gardenPlants: [], totalMeals: 0 };
+  return { meals: {}, gardenPlants: [], totalMeals: 0, achievements: {}, uniqueMealsPerDay: {} };
 }
 
 function saveData(data) {
@@ -173,6 +193,103 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// ===== Achievements System =====
+
+function ensureAchievementsData(data) {
+  if (!data.achievements) data.achievements = {};
+  if (!data.uniqueMealsPerDay) data.uniqueMealsPerDay = {};
+  return data;
+}
+
+function checkAchievements(data) {
+  ensureAchievementsData(data);
+  const newlyUnlocked = [];
+  const streak = getStreak(data);
+  const todayKey = getDateKey();
+  const todayMeals = data.meals[todayKey] || [];
+  const hour = new Date().getHours();
+
+  // Unique meals today
+  const uniqueToday = data.uniqueMealsPerDay[todayKey] || [];
+
+  function unlock(id) {
+    if (!data.achievements[id]) {
+      data.achievements[id] = { unlockedAt: new Date().toISOString() };
+      newlyUnlocked.push(id);
+    }
+  }
+
+  // Consistency badges
+  if (data.totalMeals >= 1) unlock('first_bloom');
+  if (data.totalMeals >= 5) unlock('garden_starter');
+  if (data.totalMeals >= 15) unlock('budding_gardener');
+  if (data.totalMeals >= 50) unlock('green_thumb');
+  if (data.totalMeals >= 100) unlock('master_gardener');
+
+  // Streak badges
+  if (streak >= 1) unlock('sunshine_day');
+  if (streak >= 7) unlock('week_of_wellness');
+  if (streak >= 14) unlock('fortnight_flora');
+  if (streak >= 30) unlock('monthly_bloom');
+
+  // Variety badges
+  if (uniqueToday.length >= 5) unlock('rainbow_plate');
+  if (todayMeals.some(m => new Date(m.time).getHours() < 9)) unlock('early_bird');
+  if (todayMeals.some(m => new Date(m.time).getHours() >= 20)) unlock('night_owl');
+
+  return newlyUnlocked;
+}
+
+function renderAchievements(data, newlyUnlockedIds) {
+  ensureAchievementsData(data);
+  const grid = document.getElementById('badges-grid');
+  if (!grid) return;
+
+  const recentIds = newlyUnlockedIds || [];
+
+  grid.innerHTML = ACHIEVEMENTS.map(badge => {
+    const unlocked = data.achievements[badge.id];
+    const isNew = recentIds.includes(badge.id);
+    const cls = unlocked ? 'unlocked' : 'locked';
+    const newCls = isNew ? ' newly-unlocked' : '';
+
+    if (unlocked) {
+      const date = new Date(unlocked.unlockedAt);
+      const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      return `<div class="badge-item ${cls}${newCls}" style="--badge-bg: ${badge.bg}; --badge-glow: ${badge.glow}">
+        <span class="badge-emoji">${badge.emoji}</span>
+        <span class="badge-name">${badge.name}</span>
+        <span class="badge-date">${dateStr}</span>
+      </div>`;
+    } else {
+      return `<div class="badge-item ${cls}">
+        <span class="badge-emoji">❓</span>
+        <span class="badge-name">${badge.name}</span>
+        <span class="badge-hint">${badge.hint}</span>
+      </div>`;
+    }
+  }).join('');
+}
+
+function showAchievementCelebration(achievementId) {
+  const badge = ACHIEVEMENTS.find(b => b.id === achievementId);
+  if (!badge) return;
+
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'achievement-celebration';
+  overlay.innerHTML = `<div class="achievement-celebration-content">
+    <span class="ach-emoji">${badge.emoji}</span>
+    <span class="ach-label">Achievement Unlocked!</span>
+    <span class="ach-name">${badge.name}</span>
+  </div>`;
+  document.getElementById('app').appendChild(overlay);
+
+  spawnConfetti();
+
+  setTimeout(() => overlay.remove(), 2500);
 }
 
 // ===== Garden Rendering =====
@@ -353,6 +470,14 @@ function addMeal(name) {
 
   data.meals[key].push(meal);
   data.totalMeals = (data.totalMeals || 0) + 1;
+
+  // Track unique meal names per day for Rainbow Plate badge
+  if (!data.uniqueMealsPerDay) data.uniqueMealsPerDay = {};
+  if (!data.uniqueMealsPerDay[key]) data.uniqueMealsPerDay[key] = [];
+  const normalizedName = name.trim().toLowerCase();
+  if (!data.uniqueMealsPerDay[key].includes(normalizedName)) {
+    data.uniqueMealsPerDay[key].push(normalizedName);
+  }
 
   // Add a new plant to the garden
   const plant = {
@@ -632,10 +757,12 @@ function init() {
   const data = loadData();
 
   createBgElements();
+  ensureAchievementsData(data);
   renderGreeting(data);
   renderStats(data);
   renderTodayMeals(data);
   renderGarden(data);
+  renderAchievements(data, []);
   renderWeekly(data);
 
   // Meal reminder system
@@ -674,7 +801,22 @@ function init() {
     renderWeekly(data);
     renderGreeting(data);
     checkMealReminder();
-    celebrate(data);
+
+    // Check achievements
+    const newBadges = checkAchievements(data);
+    saveData(data);
+    renderAchievements(data, newBadges);
+
+    if (newBadges.length > 0) {
+      // Show achievement celebration instead of normal one for first badge
+      let delay = 0;
+      newBadges.forEach((id, i) => {
+        setTimeout(() => showAchievementCelebration(id), delay);
+        delay += 2600;
+      });
+    } else {
+      celebrate(data);
+    }
     showShareMilestone(data.totalMeals);
   });
 
@@ -693,7 +835,21 @@ function init() {
       renderWeekly(data);
       renderGreeting(data);
       checkMealReminder();
-      celebrate(data);
+
+      // Check achievements
+      const newBadges = checkAchievements(data);
+      saveData(data);
+      renderAchievements(data, newBadges);
+
+      if (newBadges.length > 0) {
+        let delay = 0;
+        newBadges.forEach((id, i) => {
+          setTimeout(() => showAchievementCelebration(id), delay);
+          delay += 2600;
+        });
+      } else {
+        celebrate(data);
+      }
       showShareMilestone(data.totalMeals);
     });
   });
