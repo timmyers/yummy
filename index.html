@@ -86,14 +86,14 @@
         <!-- Hydration Tracker -->
         <div id="hydration-tracker" class="hydration-tracker">
           <div class="hydration-drops" id="hydration-drops">
-            <span class="water-drop" data-index="0">💧</span>
-            <span class="water-drop" data-index="1">💧</span>
-            <span class="water-drop" data-index="2">💧</span>
-            <span class="water-drop" data-index="3">💧</span>
-            <span class="water-drop" data-index="4">💧</span>
-            <span class="water-drop" data-index="5">💧</span>
-            <span class="water-drop" data-index="6">💧</span>
-            <span class="water-drop" data-index="7">💧</span>
+            <span class="water-drop" data-index="0" role="button" aria-label="Glass 1 of 8">💧</span>
+            <span class="water-drop" data-index="1" role="button" aria-label="Glass 2 of 8">💧</span>
+            <span class="water-drop" data-index="2" role="button" aria-label="Glass 3 of 8">💧</span>
+            <span class="water-drop" data-index="3" role="button" aria-label="Glass 4 of 8">💧</span>
+            <span class="water-drop" data-index="4" role="button" aria-label="Glass 5 of 8">💧</span>
+            <span class="water-drop" data-index="5" role="button" aria-label="Glass 6 of 8">💧</span>
+            <span class="water-drop" data-index="6" role="button" aria-label="Glass 7 of 8">💧</span>
+            <span class="water-drop" data-index="7" role="button" aria-label="Glass 8 of 8">💧</span>
           </div>
           <span class="hydration-label" id="hydration-label">💧 0/8 glasses today</span>
         </div>
@@ -101,23 +101,23 @@
         <h2>What did you eat? 🍓</h2>
         <form id="meal-form">
           <div class="input-group">
-            <input type="text" id="meal-input" placeholder="e.g. blueberry smoothie, mango salad..." autocomplete="off" required>
+            <input type="text" id="meal-input" placeholder="What sounds yummy?" autocomplete="off" required>
             <button type="submit" id="plant-btn">
               <span class="btn-text">Plant it! 🌱</span>
               <span class="btn-sparkle">✨</span>
             </button>
           </div>
           <div class="quick-picks">
-            <button type="button" class="quick-pick" data-meal="🍓 Strawberries">🍓</button>
-            <button type="button" class="quick-pick" data-meal="🫐 Blueberries">🫐</button>
-            <button type="button" class="quick-pick" data-meal="🍇 Grapes">🍇</button>
-            <button type="button" class="quick-pick" data-meal="🥭 Mango">🥭</button>
-            <button type="button" class="quick-pick" data-meal="🍌 Banana">🍌</button>
-            <button type="button" class="quick-pick" data-meal="🥗 Salad">🥗</button>
-            <button type="button" class="quick-pick" data-meal="🍜 Soup">🍜</button>
-            <button type="button" class="quick-pick" data-meal="🥪 Sandwich">🥪</button>
-            <button type="button" class="quick-pick" data-meal="🍚 Rice bowl">🍚</button>
-            <button type="button" class="quick-pick" data-meal="🥤 Smoothie">🥤</button>
+            <button type="button" class="quick-pick" data-meal="🍓 Strawberries" aria-label="Log Strawberries">🍓</button>
+            <button type="button" class="quick-pick" data-meal="🫐 Blueberries" aria-label="Log Blueberries">🫐</button>
+            <button type="button" class="quick-pick" data-meal="🍇 Grapes" aria-label="Log Grapes">🍇</button>
+            <button type="button" class="quick-pick" data-meal="🥭 Mango" aria-label="Log Mango">🥭</button>
+            <button type="button" class="quick-pick" data-meal="🍌 Banana" aria-label="Log Banana">🍌</button>
+            <button type="button" class="quick-pick" data-meal="🥗 Salad" aria-label="Log Salad">🥗</button>
+            <button type="button" class="quick-pick" data-meal="🍜 Soup" aria-label="Log Soup">🍜</button>
+            <button type="button" class="quick-pick" data-meal="🥪 Sandwich" aria-label="Log Sandwich">🥪</button>
+            <button type="button" class="quick-pick" data-meal="🍚 Rice bowl" aria-label="Log Rice bowl">🍚</button>
+            <button type="button" class="quick-pick" data-meal="🥤 Smoothie" aria-label="Log Smoothie">🥤</button>
           </div>
         </form>
         <!-- Mood Check-in Prompt -->
