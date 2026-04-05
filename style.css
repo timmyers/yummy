@@ -216,6 +216,94 @@ header h1 {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ===== Daily Goal Progress Ring ===== */
+.daily-goal {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(135deg, #FFF8FA, #FFF5F0);
+  border: 1px solid rgba(255, 182, 193, 0.25);
+  border-radius: 16px;
+}
+
+.goal-ring-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+}
+
+.goal-ring {
+  display: block;
+}
+
+.goal-ring-bg {
+  transition: stroke 0.4s ease;
+}
+
+.goal-ring-fill {
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
+}
+
+.goal-ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.goal-count {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.goal-label {
+  font-size: 0.65rem;
+  color: var(--text-light);
+  line-height: 1.1;
+}
+
+.goal-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-message {
+  font-size: 0.88rem;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+/* Goal completed state */
+.daily-goal.goal-complete {
+  background: linear-gradient(135deg, #FFFDE8, #FFF8E1, #FFF0D0);
+  border-color: rgba(255, 215, 0, 0.4);
+}
+
+.daily-goal.goal-complete .goal-ring-wrap {
+  animation: goalGlow 2s ease-in-out infinite;
+}
+
+.daily-goal.goal-complete .goal-count {
+  color: #D4A000;
+}
+
+@keyframes goalGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.55));
+  }
+}
+
 /* ===== Input Card ===== */
 .input-group {
   display: flex;

@@ -936,6 +936,123 @@ function showShareMilestone(totalMeals) {
 
 // ===== Push Notifications =====
 
+// ===== Daily Garden Goal =====
+
+const GOAL_STORAGE_KEY = 'yummy-garden-goal';
+const GOAL_RING_CIRCUMFERENCE = 2 * Math.PI * 34; // ~213.63
+
+function getGoalSettings() {
+  try {
+    const raw = localStorage.getItem(GOAL_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return { dailyGoal: 3, celebratedDates: [] };
+}
+
+function saveGoalSettings(settings) {
+  localStorage.setItem(GOAL_STORAGE_KEY, JSON.stringify(settings));
+}
+
+function renderDailyGoal(data) {
+  const goalSettings = getGoalSettings();
+  const goal = goalSettings.dailyGoal;
+  const todayMeals = getTodayMeals(data);
+  const count = todayMeals.length;
+  const progress = Math.min(count / goal, 1);
+
+  const ringFill = document.getElementById('goal-ring-fill');
+  const countEl = document.getElementById('goal-count');
+  const messageEl = document.getElementById('goal-message');
+  const goalContainer = document.getElementById('daily-goal');
+  const goalSelect = document.getElementById('goal-select');
+
+  if (!ringFill || !countEl || !messageEl || !goalContainer) return;
+
+  // Update progress ring
+  const offset = GOAL_RING_CIRCUMFERENCE * (1 - progress);
+  ringFill.style.strokeDashoffset = offset;
+
+  // Update text
+  countEl.textContent = `${count} of ${goal}`;
+
+  // Update goal select if present
+  if (goalSelect) goalSelect.value = String(goal);
+
+  // Completed vs in-progress states
+  const todayKey = getDateKey();
+  const alreadyCelebrated = goalSettings.celebratedDates && goalSettings.celebratedDates.includes(todayKey);
+
+  if (count >= goal) {
+    goalContainer.classList.add('goal-complete');
+    ringFill.setAttribute('stroke', 'url(#goal-gradient-gold)');
+    messageEl.textContent = 'Goal reached! 🎉';
+  } else {
+    goalContainer.classList.remove('goal-complete');
+    ringFill.setAttribute('stroke', 'url(#goal-gradient)');
+
+    // Encouraging messages based on progress
+    if (count === 0) {
+      messageEl.textContent = "Let's nourish your garden today!";
+    } else if (progress < 0.5) {
+      messageEl.textContent = `Great start! ${goal - count} more to go 🌱`;
+    } else {
+      messageEl.textContent = `Almost there! Just ${goal - count} more 🌸`;
+    }
+  }
+}
+
+function checkGoalCelebration(data) {
+  const goalSettings = getGoalSettings();
+  const goal = goalSettings.dailyGoal;
+  const todayMeals = getTodayMeals(data);
+  const todayKey = getDateKey();
+
+  if (!goalSettings.celebratedDates) goalSettings.celebratedDates = [];
+
+  // Celebrate exactly when we hit the goal, only once per day
+  if (todayMeals.length === goal && !goalSettings.celebratedDates.includes(todayKey)) {
+    goalSettings.celebratedDates.push(todayKey);
+    // Keep only last 30 days of celebration tracking
+    if (goalSettings.celebratedDates.length > 30) {
+      goalSettings.celebratedDates = goalSettings.celebratedDates.slice(-30);
+    }
+    saveGoalSettings(goalSettings);
+    return true;
+  }
+  return false;
+}
+
+function celebrateGoalComplete() {
+  const overlay = document.getElementById('celebration');
+  const emojiEl = document.getElementById('celebration-emoji');
+  const textEl = document.getElementById('celebration-text');
+
+  emojiEl.textContent = '🌸';
+  textEl.textContent = 'You nourished yourself beautifully today! 🌸';
+
+  overlay.classList.remove('hidden');
+  setTimeout(() => overlay.classList.add('hidden'), 2200);
+
+  spawnConfetti();
+}
+
+function initGoalSettings() {
+  const goalSelect = document.getElementById('goal-select');
+  if (!goalSelect) return;
+
+  const goalSettings = getGoalSettings();
+  goalSelect.value = String(goalSettings.dailyGoal);
+
+  goalSelect.addEventListener('change', () => {
+    const goalSettings = getGoalSettings();
+    goalSettings.dailyGoal = parseInt(goalSelect.value, 10);
+    saveGoalSettings(goalSettings);
+    const data = loadData();
+    renderDailyGoal(data);
+    showToast(`Daily goal set to ${goalSettings.dailyGoal} meals 🎯`);
+  });
+}
+
 const NOTIF_STORAGE_KEY = 'yummy-garden-notifs';
 
 function getNotifSettings() {
@@ -1118,6 +1235,10 @@ function init() {
   renderWeekly(data);
   renderHistory(data);
 
+  // Daily goal
+  renderDailyGoal(data);
+  initGoalSettings();
+
   // Meal reminder system
   checkMealReminder();
   setInterval(checkMealReminder, 60000);
@@ -1157,12 +1278,16 @@ function init() {
     renderWeekly(data);
     renderHistory(data);
     renderGreeting(data);
+    renderDailyGoal(data);
     checkMealReminder();
 
     // Check achievements
     const newBadges = checkAchievements(data);
     saveData(data);
     renderAchievements(data, newBadges);
+
+    // Check daily goal celebration first
+    const goalReached = checkGoalCelebration(data);
 
     if (newBadges.length > 0) {
       // Show achievement celebration instead of normal one for first badge
@@ -1171,6 +1296,12 @@ function init() {
         setTimeout(() => showAchievementCelebration(id), delay);
         delay += 2600;
       });
+      // If goal also reached, celebrate after achievements
+      if (goalReached) {
+        setTimeout(() => celebrateGoalComplete(), newBadges.length * 2600);
+      }
+    } else if (goalReached) {
+      celebrateGoalComplete();
     } else {
       celebrate(data);
     }
@@ -1191,6 +1322,7 @@ function init() {
       renderGarden(data);
       renderWeekly(data);
       renderGreeting(data);
+      renderDailyGoal(data);
       checkMealReminder();
 
       // Check achievements
@@ -1198,12 +1330,20 @@ function init() {
       saveData(data);
       renderAchievements(data, newBadges);
 
+      // Check daily goal celebration first
+      const goalReached = checkGoalCelebration(data);
+
       if (newBadges.length > 0) {
         let delay = 0;
         newBadges.forEach((id, i) => {
           setTimeout(() => showAchievementCelebration(id), delay);
           delay += 2600;
         });
+        if (goalReached) {
+          setTimeout(() => celebrateGoalComplete(), newBadges.length * 2600);
+        }
+      } else if (goalReached) {
+        celebrateGoalComplete();
       } else {
         celebrate(data);
       }

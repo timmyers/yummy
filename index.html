@@ -46,6 +46,34 @@
           <span id="reminder-text"></span>
           <button type="button" id="reminder-dismiss" class="reminder-dismiss" aria-label="Dismiss">&times;</button>
         </div>
+        <!-- Daily Garden Goal Progress Ring -->
+        <div id="daily-goal" class="daily-goal">
+          <div class="goal-ring-wrap">
+            <svg class="goal-ring" viewBox="0 0 80 80" width="80" height="80">
+              <defs>
+                <linearGradient id="goal-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FF6B9D"/>
+                  <stop offset="100%" stop-color="#FFA07A"/>
+                </linearGradient>
+                <linearGradient id="goal-gradient-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FFD700"/>
+                  <stop offset="100%" stop-color="#FFA500"/>
+                </linearGradient>
+              </defs>
+              <circle class="goal-ring-bg" cx="40" cy="40" r="34" fill="none" stroke="#F0E8E8" stroke-width="6"/>
+              <circle id="goal-ring-fill" class="goal-ring-fill" cx="40" cy="40" r="34" fill="none" stroke="url(#goal-gradient)" stroke-width="6" stroke-linecap="round"
+                stroke-dasharray="213.63" stroke-dashoffset="213.63" transform="rotate(-90 40 40)"/>
+            </svg>
+            <div class="goal-ring-text">
+              <span id="goal-count" class="goal-count">0 of 3</span>
+              <span class="goal-label">meals</span>
+            </div>
+          </div>
+          <div class="goal-info">
+            <span id="goal-message" class="goal-message">Let's nourish your garden today!</span>
+          </div>
+        </div>
+
         <h2>What did you eat? 🍓</h2>
         <form id="meal-form">
           <div class="input-group">
@@ -133,6 +161,18 @@
             <option value="3" selected>3 hours</option>
             <option value="4">4 hours</option>
             <option value="5">5 hours</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Daily meal goal</span>
+            <span class="setting-desc">How many meals to aim for each day</span>
+          </div>
+          <select id="goal-select" class="notif-select">
+            <option value="2">2 meals</option>
+            <option value="3" selected>3 meals</option>
+            <option value="4">4 meals</option>
+            <option value="5">5 meals</option>
           </select>
         </div>
       </section>
