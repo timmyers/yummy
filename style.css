@@ -940,6 +940,139 @@ header h1 {
   border-color: var(--pink);
 }
 
+/* ===== Meal History & Insights ===== */
+.history-card {
+  background: linear-gradient(135deg, #FFF9F0 0%, #FFF0F5 50%, #F0FFF4 100%);
+}
+
+.history-insights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.insight-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  background: linear-gradient(135deg, #FFF0F5, #FDE8EF);
+  border: 1px solid rgba(255, 182, 193, 0.3);
+  border-radius: 50px;
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.insight-pill.mint {
+  background: linear-gradient(135deg, #E8F8F0, #D4F1E8);
+  border-color: rgba(107, 203, 119, 0.3);
+}
+
+.insight-pill.lavender {
+  background: linear-gradient(135deg, #F0EEFF, #E8E0FF);
+  border-color: rgba(177, 151, 252, 0.3);
+}
+
+.history-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.accordion-item {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 182, 193, 0.2);
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  background: linear-gradient(135deg, rgba(255, 240, 245, 0.6), rgba(255, 249, 240, 0.6));
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.88rem;
+  color: var(--text);
+  transition: background 0.2s;
+}
+
+.accordion-header:hover {
+  background: linear-gradient(135deg, rgba(255, 230, 240, 0.8), rgba(255, 245, 235, 0.8));
+}
+
+.accordion-header .bloom-icon {
+  font-size: 1.15rem;
+}
+
+.accordion-header .day-label {
+  font-weight: 600;
+  flex: 1;
+}
+
+.accordion-header .meal-count {
+  font-size: 0.78rem;
+  color: var(--text-light);
+}
+
+.accordion-header .chevron {
+  font-size: 0.7rem;
+  color: var(--text-light);
+  transition: transform 0.3s ease;
+}
+
+.accordion-item.open .accordion-header .chevron {
+  transform: rotate(180deg);
+}
+
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.accordion-item.open .accordion-body {
+  max-height: 500px;
+}
+
+.accordion-body-inner {
+  padding: 0.4rem 0.85rem 0.7rem;
+}
+
+.accordion-body-inner .meal-list {
+  list-style: none;
+}
+
+.accordion-body-inner .meal-list li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255, 182, 193, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+}
+
+.accordion-body-inner .meal-list li:last-child {
+  border-bottom: none;
+}
+
+.accordion-body-inner .empty-day {
+  color: var(--text-light);
+  font-style: italic;
+  font-size: 0.85rem;
+  padding: 0.3rem 0;
+}
+
+.accordion-item.today-item .accordion-header {
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.08), rgba(255, 160, 122, 0.08));
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 540px) {
   #app {

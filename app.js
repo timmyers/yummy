@@ -388,6 +388,158 @@ function renderWeekly(data) {
   grid.innerHTML = html;
 }
 
+// ===== Meal History & Insights =====
+
+function renderHistory(data) {
+  renderInsights(data);
+  renderAccordion(data);
+}
+
+function renderInsights(data) {
+  const container = document.getElementById('history-insights');
+  if (!container) return;
+
+  const insights = [];
+  const today = new Date();
+  let totalMealsThisWeek = 0;
+  let daysWithMeals = 0;
+  let bestDay = null;
+  let bestDayCount = 0;
+  const mealNameCounts = {};
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = getDateKey(d);
+    const dayMeals = data.meals[key] || [];
+    totalMealsThisWeek += dayMeals.length;
+    if (dayMeals.length > 0) daysWithMeals++;
+
+    if (dayMeals.length > bestDayCount) {
+      bestDayCount = dayMeals.length;
+      bestDay = d;
+    }
+
+    dayMeals.forEach(m => {
+      const name = m.name.trim().toLowerCase();
+      mealNameCounts[name] = (mealNameCounts[name] || 0) + 1;
+    });
+  }
+
+  // Best day insight
+  if (bestDay && bestDayCount > 0) {
+    const dayName = bestDay.toLocaleDateString([], { weekday: 'long' });
+    insights.push({
+      text: `Your best day was ${dayName} with ${bestDayCount} meal${bestDayCount !== 1 ? 's' : ''}! 🌸`,
+      style: '',
+    });
+  }
+
+  // Favorite meal insight
+  let favMeal = null;
+  let favCount = 0;
+  for (const [name, count] of Object.entries(mealNameCounts)) {
+    if (count > favCount) {
+      favCount = count;
+      favMeal = name;
+    }
+  }
+  if (favMeal && favCount >= 2) {
+    // Capitalize first letter
+    const display = favMeal.charAt(0).toUpperCase() + favMeal.slice(1);
+    insights.push({
+      text: `You love ${display} — ${favCount} times this week! 🍓`,
+      style: 'mint',
+    });
+  }
+
+  // Average meals per day
+  if (daysWithMeals > 0) {
+    const avg = (totalMealsThisWeek / 7).toFixed(1);
+    insights.push({
+      text: `Averaging ${avg} meals per day this week 🌱`,
+      style: 'lavender',
+    });
+  }
+
+  if (insights.length === 0) {
+    container.innerHTML = '<span class="insight-pill">Start logging meals to see your insights! ✨</span>';
+    return;
+  }
+
+  container.innerHTML = insights.map(ins =>
+    `<span class="insight-pill ${ins.style}">${escapeHtml(ins.text)}</span>`
+  ).join('');
+}
+
+function renderAccordion(data) {
+  const container = document.getElementById('history-accordion');
+  if (!container) return;
+
+  const today = new Date();
+  const todayKey = getDateKey();
+  let html = '';
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = getDateKey(d);
+    const dayMeals = data.meals[key] || [];
+    const isToday = key === todayKey;
+    const isOpen = isToday;
+
+    const dateLabel = isToday
+      ? 'Today'
+      : d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+
+    let bloomIcon = '🌑';
+    if (dayMeals.length >= 3) bloomIcon = '🌸';
+    else if (dayMeals.length === 2) bloomIcon = '🌷';
+    else if (dayMeals.length === 1) bloomIcon = '🌱';
+
+    const countText = `${dayMeals.length} meal${dayMeals.length !== 1 ? 's' : ''}`;
+
+    let bodyContent = '';
+    if (dayMeals.length === 0) {
+      bodyContent = '<p class="empty-day">No meals logged this day</p>';
+    } else {
+      bodyContent = '<ul class="meal-list">' + dayMeals.map(meal => {
+        const icon = getMealIcon(meal.name);
+        const time = new Date(meal.time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        return `<li>
+          <span class="meal-icon">${icon}</span>
+          <span>${escapeHtml(meal.name)}</span>
+          <span class="meal-time">${time}</span>
+        </li>`;
+      }).join('') + '</ul>';
+    }
+
+    html += `<div class="accordion-item${isOpen ? ' open' : ''}${isToday ? ' today-item' : ''}">
+      <button class="accordion-header" type="button" aria-expanded="${isOpen}">
+        <span class="bloom-icon">${bloomIcon}</span>
+        <span class="day-label">${dateLabel}</span>
+        <span class="meal-count">${countText}</span>
+        <span class="chevron">▼</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-body-inner">${bodyContent}</div>
+      </div>
+    </div>`;
+  }
+
+  container.innerHTML = html;
+
+  // Attach toggle listeners
+  container.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const item = header.parentElement;
+      const wasOpen = item.classList.contains('open');
+      item.classList.toggle('open');
+      header.setAttribute('aria-expanded', !wasOpen);
+    });
+  });
+}
+
 // ===== Background Elements =====
 
 function createBgElements() {
@@ -964,6 +1116,7 @@ function init() {
   renderGarden(data);
   renderAchievements(data, []);
   renderWeekly(data);
+  renderHistory(data);
 
   // Meal reminder system
   checkMealReminder();
@@ -1002,6 +1155,7 @@ function init() {
     renderTodayMeals(data);
     renderGarden(data);
     renderWeekly(data);
+    renderHistory(data);
     renderGreeting(data);
     checkMealReminder();
 
