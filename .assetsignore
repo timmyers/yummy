@@ -1,0 +1,8 @@
+node_modules
+.git
+.claude
+.github
+test-e2e.js
+screenshot*
+package-lock.json
+wrangler.jsonc
