@@ -1,5 +1,7 @@
 # Yummy Garden 🌸
 
+![Tests](https://github.com/timmyers/yummy/actions/workflows/test.yml/badge.svg)
+
 A cute, gamified meal-tracking app that helps you build healthy eating patterns by growing a virtual garden. Every meal you log makes your garden bloom!
 
 ## Features

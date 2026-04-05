@@ -1116,9 +1116,23 @@ async function registerServiceWorker() {
   }
 }
 
+function isIOSSafari() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+function isStandaloneMode() {
+  return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+}
+
 async function enableNotifications() {
   if (!('Notification' in window)) {
-    showToast('Notifications not supported in this browser 😢');
+    if (isIOSSafari() && !isStandaloneMode()) {
+      showToast('To get reminders on iPhone, tap Share → Add to Home Screen first! 📲');
+    } else if (isIOSSafari() && isStandaloneMode()) {
+      showToast('Please update to iOS 16.4+ for notification support 🔔');
+    } else {
+      showToast('Notifications not supported in this browser 😢');
+    }
     return false;
   }
 
@@ -1255,6 +1269,24 @@ function initNotifications() {
       });
     }
     showToast(`Reminders set to every ${settings.intervalHours} hours 🔔`);
+  });
+}
+
+function initIOSInstallPrompt() {
+  const row = document.getElementById('ios-install-row');
+  const btn = document.getElementById('ios-install-btn');
+  if (!row || !btn) return;
+
+  // Show only on iOS Safari when NOT already in standalone mode
+  if (isIOSSafari() && !isStandaloneMode()) {
+    row.classList.remove('hidden');
+  } else {
+    row.classList.add('hidden');
+    return;
+  }
+
+  btn.addEventListener('click', () => {
+    showToast('Tap the Share button in Safari, then select "Add to Home Screen" 📲');
   });
 }
 
@@ -1433,6 +1465,9 @@ function init() {
 
   // Push notifications
   initNotifications();
+
+  // iOS install prompt
+  initIOSInstallPrompt();
 
   // Form submit
   const form = document.getElementById('meal-form');
