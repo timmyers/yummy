@@ -1220,6 +1220,79 @@ function initNotifications() {
   });
 }
 
+// ===== Hydration Tracker =====
+
+const HYDRATION_GOAL = 8;
+
+function getHydrationCount(data) {
+  if (!data.hydration) data.hydration = {};
+  const key = getDateKey();
+  return data.hydration[key] || 0;
+}
+
+function setHydrationCount(data, count) {
+  if (!data.hydration) data.hydration = {};
+  const key = getDateKey();
+  data.hydration[key] = count;
+  saveData(data);
+}
+
+function renderHydration(data) {
+  const count = getHydrationCount(data);
+  const drops = document.querySelectorAll('#hydration-drops .water-drop');
+  const label = document.getElementById('hydration-label');
+
+  drops.forEach((drop, i) => {
+    if (i < count) {
+      drop.classList.add('filled');
+    } else {
+      drop.classList.remove('filled');
+    }
+  });
+
+  if (label) {
+    label.textContent = `\uD83D\uDCA7 ${count}/${HYDRATION_GOAL} glasses today`;
+  }
+}
+
+function showRainCloud() {
+  const cloud = document.getElementById('rain-cloud');
+  if (!cloud) return;
+  cloud.classList.remove('hidden');
+  setTimeout(() => cloud.classList.add('hidden'), 3500);
+}
+
+function initHydration() {
+  const data = loadData();
+  renderHydration(data);
+
+  const drops = document.querySelectorAll('#hydration-drops .water-drop');
+  drops.forEach(drop => {
+    drop.addEventListener('click', () => {
+      const index = parseInt(drop.getAttribute('data-index'), 10);
+      const data = loadData();
+      const currentCount = getHydrationCount(data);
+
+      let newCount;
+      // If tapping a filled drop: unfill it and all after it
+      // If tapping an unfilled drop: fill it and all before it
+      if (index < currentCount) {
+        newCount = index;
+      } else {
+        newCount = index + 1;
+      }
+
+      setHydrationCount(data, newCount);
+      renderHydration(data);
+
+      if (newCount >= HYDRATION_GOAL && currentCount < HYDRATION_GOAL) {
+        showRainCloud();
+        showToast("Your garden got a good rain! \uD83C\uDF27\uFE0F\uD83D\uDC96");
+      }
+    });
+  });
+}
+
 // ===== Event Handlers =====
 
 function init() {
@@ -1238,6 +1311,9 @@ function init() {
   // Daily goal
   renderDailyGoal(data);
   initGoalSettings();
+
+  // Hydration tracker
+  initHydration();
 
   // Meal reminder system
   checkMealReminder();

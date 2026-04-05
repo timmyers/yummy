@@ -304,6 +304,120 @@ header h1 {
   }
 }
 
+/* ===== Hydration Tracker ===== */
+.hydration-tracker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(135deg, #F0F8FF, #E8F4FD);
+  border: 1px solid rgba(116, 192, 252, 0.25);
+  border-radius: 14px;
+}
+
+.hydration-drops {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.water-drop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.1rem;
+  border-radius: 50%;
+  cursor: pointer;
+  background: #E8E8E8;
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  line-height: 1;
+}
+
+.water-drop:hover {
+  transform: scale(1.15);
+}
+
+.water-drop.filled {
+  background: linear-gradient(135deg, #74C0FC, #4DC9F6);
+  box-shadow: 0 2px 8px rgba(77, 201, 246, 0.3);
+  animation: dropBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes dropBounce {
+  0% { transform: scale(0.7); }
+  50% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+.hydration-label {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  line-height: 1;
+}
+
+/* ===== Rain Cloud Animation ===== */
+.rain-cloud {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: rainCloudFloat 3.5s ease-in-out forwards;
+  pointer-events: none;
+}
+
+.rain-cloud.hidden {
+  display: none;
+}
+
+.rain-cloud-emoji {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
+}
+
+.raindrop {
+  position: absolute;
+  font-size: 0.7rem;
+  top: 2.2rem;
+  opacity: 0;
+}
+
+.raindrop.rd1 {
+  left: 30%;
+  animation: raindropFall 1s 0.4s ease-in infinite;
+}
+
+.raindrop.rd2 {
+  left: 50%;
+  animation: raindropFall 1s 0.7s ease-in infinite;
+}
+
+.raindrop.rd3 {
+  left: 70%;
+  animation: raindropFall 1s 1.0s ease-in infinite;
+}
+
+@keyframes raindropFall {
+  0% { transform: translateY(0); opacity: 0.8; }
+  100% { transform: translateY(60px); opacity: 0; }
+}
+
+@keyframes rainCloudFloat {
+  0% { opacity: 0; transform: translateX(-80%); }
+  15% { opacity: 1; transform: translateX(-50%); }
+  80% { opacity: 1; transform: translateX(-50%); }
+  100% { opacity: 0; transform: translateX(-20%); }
+}
+
 /* ===== Input Card ===== */
 .input-group {
   display: flex;

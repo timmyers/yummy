@@ -69,7 +69,7 @@ async function run() {
   console.log('\n🌸 Yummy Garden E2E Tests\n');
 
   const server = await startServer();
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: 'shell' });
   const page = await browser.newPage();
   await page.setViewport({ width: 414, height: 896 }); // iPhone-ish
 
@@ -221,6 +221,38 @@ async function run() {
 
     const reloadMeals = await page.$eval('#today-meals', el => el.textContent);
     assert(reloadMeals.includes('Strawberry smoothie'), 'Meals persist after reload');
+
+    // ===== Hydration Tracker =====
+    console.log('\n💧 Hydration Tracker');
+
+    const hydrationSection = await page.$('#hydration-tracker');
+    assert(hydrationSection !== null, 'Hydration tracker section exists');
+
+    const dropsBefore = await page.$$eval('#hydration-drops .water-drop.filled', els => els.length);
+    assert(dropsBefore === 0, 'No drops filled initially');
+
+    const labelBefore = await page.$eval('#hydration-label', el => el.textContent);
+    assert(labelBefore.includes('0/8'), 'Label shows 0/8 initially');
+
+    // Tap the 3rd water drop (index 2) — should fill drops 0, 1, 2
+    await page.click('.water-drop[data-index="2"]');
+    await wait(300);
+
+    const dropsAfter = await page.$$eval('#hydration-drops .water-drop.filled', els => els.length);
+    assert(dropsAfter === 3, `Tapping 3rd drop fills 3 drops (got ${dropsAfter})`);
+
+    const labelAfter = await page.$eval('#hydration-label', el => el.textContent);
+    assert(labelAfter.includes('3/8'), 'Label updates to 3/8 after tapping');
+
+    // Tap a filled drop to unfill — tap index 1, should set count to 1
+    await page.click('.water-drop[data-index="1"]');
+    await wait(300);
+
+    const dropsUnfill = await page.$$eval('#hydration-drops .water-drop.filled', els => els.length);
+    assert(dropsUnfill === 1, `Tapping filled drop unfills correctly (got ${dropsUnfill})`);
+
+    const labelUnfill = await page.$eval('#hydration-label', el => el.textContent);
+    assert(labelUnfill.includes('1/8'), 'Label updates to 1/8 after unfilling');
 
   } catch (err) {
     console.error('\n💥 Test error:', err.message);
