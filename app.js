@@ -1146,21 +1146,20 @@ function renderDailyGoal(data) {
   const offset = GOAL_RING_CIRCUMFERENCE * (1 - progress);
   ringFill.style.strokeDashoffset = offset;
 
-  // Update text
-  countEl.textContent = `${count} of ${goal}`;
-
   // Update goal select if present
   if (goalSelect) goalSelect.value = String(goal);
 
   // Completed vs in-progress states
-  const todayKey = getDateKey();
-  const alreadyCelebrated = goalSettings.celebratedDates && goalSettings.celebratedDates.includes(todayKey);
-
   if (count >= goal) {
+    // Show checkmark instead of "4 of 3"
+    countEl.textContent = `${goal} ✓`;
     goalContainer.classList.add('goal-complete');
     ringFill.setAttribute('stroke', 'url(#goal-gradient-gold)');
-    messageEl.textContent = 'Goal reached! 🎉';
+    messageEl.textContent = count > goal
+      ? `Goal smashed! ${count} meals today! 🌟`
+      : 'Goal reached! 🎉';
   } else {
+    countEl.textContent = `${count} of ${goal}`;
     goalContainer.classList.remove('goal-complete');
     ringFill.setAttribute('stroke', 'url(#goal-gradient)');
 
