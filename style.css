@@ -528,6 +528,20 @@ header h1 {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   padding-bottom: 0.2rem;
+  position: relative;
+}
+
+.quick-picks::after {
+  content: '';
+  position: sticky;
+  right: 0;
+  top: 0;
+  flex-shrink: 0;
+  width: 30px;
+  margin-left: -30px;
+  background: linear-gradient(to right, transparent, var(--soft-white));
+  pointer-events: none;
+  align-self: stretch;
 }
 
 .quick-picks::-webkit-scrollbar {
