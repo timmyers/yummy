@@ -438,6 +438,15 @@ function renderGarden(data) {
   plots.innerHTML = '';
   const plants = data.gardenPlants || [];
 
+  if (plants.length === 0) {
+    plots.innerHTML = `
+      <div class="garden-empty-state">
+        <div class="garden-empty-seed">🌱</div>
+        <p class="garden-empty-text">Log a meal to plant your first flower!</p>
+      </div>
+    `;
+  }
+
   plants.forEach((plant, i) => {
     const el = document.createElement('div');
     el.className = 'garden-plant';
