@@ -87,6 +87,15 @@ async function run() {
     const greeting = await page.$eval('#greeting', el => el.textContent);
     assert(greeting.length > 0, 'Greeting is displayed');
 
+    // ===== Daily Affirmation =====
+    console.log('\n✨ Daily Affirmation');
+
+    const affirmationSection = await page.$('#affirmation-banner');
+    assert(affirmationSection !== null, 'Affirmation banner section exists');
+
+    const affirmationText = await page.$eval('#affirmation-text', el => el.textContent);
+    assert(affirmationText.length > 0, 'Affirmation contains text content');
+
     // ===== Initial State =====
     console.log('\n🌱 Initial State');
 

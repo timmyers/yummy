@@ -57,6 +57,55 @@ const CONTEXTUAL_PROMPTS = {
   evening_few_meals: "Still time to nurture yourself tonight 🌙",
 };
 
+// ===== Daily Affirmations =====
+
+const AFFIRMATIONS = [
+  "🌷 Nourishing my body is an act of love 💗",
+  "🌸 I deserve to eat well and feel good 🌸",
+  "🎀 Every meal is a gift I give myself 🎁",
+  "🦋 My body thanks me when I feed it kindly 🦋",
+  "💪 I am worthy of feeling energized and strong 💪",
+  "🌺 Taking care of myself is not selfish — it's essential 🌺",
+  "🌷 I choose foods that make me bloom 🌷",
+  "🌻 I am grateful for every bite that fuels my day 🌻",
+  "🍓 My body is my garden — I tend to it with love 🍓",
+  "🌈 Every healthy choice is a step toward my best self 🌈",
+  "💖 I honor my hunger and nourish myself fully 💖",
+  "🌿 I listen to my body and give it what it needs 🌿",
+  "🌸 I am blooming into the healthiest version of me 🌸",
+  "☀️ Today I choose to fuel myself with kindness ☀️",
+  "🍑 I am allowed to enjoy food without guilt 🍑",
+  "🌹 Eating well is how I show myself respect 🌹",
+  "✨ My body deserves the best I can give it ✨",
+  "🫶 I am learning to love myself one meal at a time 🫶",
+  "🌼 Food is my friend, not my enemy 🌼",
+  "🧁 Every bite I take is an investment in my wellbeing 🧁",
+  "🌙 I release all stress around eating and welcome peace 🌙",
+  "🦋 I trust my body to tell me what it needs 🦋",
+  "🌸 I am proud of myself for showing up today 🌸",
+  "🌻 My worth is not measured by what I eat 🌻",
+  "💐 I am growing stronger and more radiant every day 💐",
+  "🌷 Feeding myself well is a beautiful act of self-care 🌷",
+  "🍊 I celebrate every small step toward feeling good 🍊",
+  "🌺 My body is amazing and deserves amazing nourishment 🌺",
+  "🪷 I am gentle with myself on this journey 🪷",
+  "🌟 Today I plant seeds of health that will bloom forever 🌟",
+  "🌈 I am enough, and I deserve to feel wonderful 🌈",
+];
+
+function getDailyAffirmation() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  return AFFIRMATIONS[dayOfYear % AFFIRMATIONS.length];
+}
+
+function renderAffirmation() {
+  const el = document.getElementById('affirmation-text');
+  if (el) el.textContent = getDailyAffirmation();
+}
+
 // ===== Data Management =====
 
 function loadData() {
@@ -1434,6 +1483,7 @@ function init() {
   const data = loadData();
 
   createBgElements();
+  renderAffirmation();
   ensureAchievementsData(data);
   renderGreeting(data);
   renderStats(data);
