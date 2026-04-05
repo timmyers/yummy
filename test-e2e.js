@@ -176,6 +176,21 @@ async function run() {
     const todayDay = await page.$('.week-day.today');
     assert(todayDay !== null, 'Today is highlighted in weekly view');
 
+    // ===== Garden Seasons =====
+    console.log('\n🌿 Garden Seasons');
+
+    const seasonLabel = await page.$('#season-label');
+    assert(seasonLabel !== null, 'Season label element exists');
+
+    const seasonText = await page.$eval('#season-label', el => el.textContent);
+    assert(seasonText.includes('Spring'), 'Season label shows Spring initially (3 meals)');
+
+    const gardenHasSeasonClass = await page.$eval('#garden', el =>
+      el.classList.contains('season-spring') || el.classList.contains('season-summer') ||
+      el.classList.contains('season-autumn') || el.classList.contains('season-winter')
+    );
+    assert(gardenHasSeasonClass, 'Garden has a season CSS class applied');
+
     // ===== History Section =====
     console.log('\n🌿 Meal History');
 

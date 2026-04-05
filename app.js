@@ -350,6 +350,78 @@ function showAchievementCelebration(achievementId) {
   setTimeout(() => overlay.remove(), 2500);
 }
 
+// ===== Garden Seasons =====
+
+function getGardenSeason(totalMeals) {
+  if (totalMeals >= 75) {
+    return { id: 'winter', cssClass: 'season-winter', label: 'Winter Wonderland \u2744\uFE0F' };
+  } else if (totalMeals >= 40) {
+    return { id: 'autumn', cssClass: 'season-autumn', label: 'Autumn Garden \uD83C\uDF42' };
+  } else if (totalMeals >= 15) {
+    return { id: 'summer', cssClass: 'season-summer', label: 'Summer Garden \u2600\uFE0F' };
+  }
+  return { id: 'spring', cssClass: 'season-spring', label: 'Spring Garden \uD83C\uDF31' };
+}
+
+function checkSeasonTransition(oldTotal, newTotal) {
+  const oldSeason = getGardenSeason(oldTotal);
+  const newSeason = getGardenSeason(newTotal);
+  if (oldSeason.id !== newSeason.id) {
+    return newSeason;
+  }
+  return null;
+}
+
+function celebrateSeasonTransition(season) {
+  const messages = {
+    summer: 'Your garden entered Summer! \u2600\uFE0F Keep blooming!',
+    autumn: 'Autumn colors are here! \uD83C\uDF42 Beautiful progress!',
+    winter: 'Welcome to Winter Wonderland! \u2744\uFE0F You\'re incredible!',
+  };
+  const message = messages[season.id];
+  if (!message) return;
+
+  const overlay = document.getElementById('celebration');
+  const emojiEl = document.getElementById('celebration-emoji');
+  const textEl = document.getElementById('celebration-text');
+
+  const emojiMap = { summer: '\u2600\uFE0F', autumn: '\uD83C\uDF42', winter: '\u2744\uFE0F' };
+  emojiEl.textContent = emojiMap[season.id] || '\uD83C\uDF38';
+  textEl.textContent = message;
+
+  overlay.classList.remove('hidden');
+  setTimeout(() => overlay.classList.add('hidden'), 2200);
+  spawnConfetti();
+}
+
+function renderSeasonParticles(season) {
+  const container = document.getElementById('season-particles');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (season.id === 'autumn') {
+    const leaves = ['\uD83C\uDF42', '\uD83C\uDF41', '\uD83C\uDF42', '\uD83C\uDF41'];
+    leaves.forEach((leaf, i) => {
+      const el = document.createElement('div');
+      el.className = 'season-particle autumn-leaf';
+      el.textContent = leaf;
+      el.style.left = `${15 + i * 22}%`;
+      el.style.animationDelay = `${i * 1.8}s`;
+      container.appendChild(el);
+    });
+  } else if (season.id === 'winter') {
+    const flakes = ['\u2744\uFE0F', '\u2728', '\u2744\uFE0F', '\u2728'];
+    flakes.forEach((flake, i) => {
+      const el = document.createElement('div');
+      el.className = 'season-particle winter-flake';
+      el.textContent = flake;
+      el.style.left = `${10 + i * 25}%`;
+      el.style.animationDelay = `${i * 2.1}s`;
+      container.appendChild(el);
+    });
+  }
+}
+
 // ===== Garden Rendering =====
 
 function renderGarden(data) {
@@ -401,6 +473,21 @@ function renderGarden(data) {
   if (data.totalMeals >= 5) {
     rainbow.classList.remove('hidden');
   }
+
+  // Apply garden season
+  const season = getGardenSeason(data.totalMeals);
+  const gardenEl = document.getElementById('garden');
+  gardenEl.classList.remove('season-spring', 'season-summer', 'season-autumn', 'season-winter');
+  gardenEl.classList.add(season.cssClass);
+
+  // Update season label
+  const seasonLabel = document.getElementById('season-label');
+  if (seasonLabel) {
+    seasonLabel.textContent = season.label;
+  }
+
+  // Render season particles
+  renderSeasonParticles(season);
 }
 
 // ===== Weekly View =====
@@ -1532,6 +1619,7 @@ function init() {
     btn.classList.add('sparkle');
     setTimeout(() => btn.classList.remove('sparkle'), 600);
 
+    const oldTotal = loadData().totalMeals || 0;
     const data = addMeal(val);
     input.value = '';
     input.focus();
@@ -1556,6 +1644,9 @@ function init() {
     // Check daily goal celebration first
     const goalReached = checkGoalCelebration(data);
 
+    // Check season transition
+    const newSeason = checkSeasonTransition(oldTotal, data.totalMeals);
+
     if (newBadges.length > 0) {
       // Show achievement celebration instead of normal one for first badge
       let delay = 0;
@@ -1567,8 +1658,16 @@ function init() {
       if (goalReached) {
         setTimeout(() => celebrateGoalComplete(), newBadges.length * 2600);
       }
+      if (newSeason) {
+        setTimeout(() => celebrateSeasonTransition(newSeason), newBadges.length * 2600 + (goalReached ? 2400 : 0));
+      }
     } else if (goalReached) {
       celebrateGoalComplete();
+      if (newSeason) {
+        setTimeout(() => celebrateSeasonTransition(newSeason), 2400);
+      }
+    } else if (newSeason) {
+      celebrateSeasonTransition(newSeason);
     } else {
       celebrate(data);
     }
@@ -1580,6 +1679,7 @@ function init() {
   document.querySelectorAll('.quick-pick').forEach(pick => {
     pick.addEventListener('click', () => {
       const meal = pick.getAttribute('data-meal');
+      const oldTotal = loadData().totalMeals || 0;
       const data = addMeal(meal);
 
       // Reset reminder state when a meal is logged
@@ -1601,6 +1701,9 @@ function init() {
       // Check daily goal celebration first
       const goalReached = checkGoalCelebration(data);
 
+      // Check season transition
+      const newSeason = checkSeasonTransition(oldTotal, data.totalMeals);
+
       if (newBadges.length > 0) {
         let delay = 0;
         newBadges.forEach((id, i) => {
@@ -1610,8 +1713,16 @@ function init() {
         if (goalReached) {
           setTimeout(() => celebrateGoalComplete(), newBadges.length * 2600);
         }
+        if (newSeason) {
+          setTimeout(() => celebrateSeasonTransition(newSeason), newBadges.length * 2600 + (goalReached ? 2400 : 0));
+        }
       } else if (goalReached) {
         celebrateGoalComplete();
+        if (newSeason) {
+          setTimeout(() => celebrateSeasonTransition(newSeason), 2400);
+        }
+      } else if (newSeason) {
+        celebrateSeasonTransition(newSeason);
       } else {
         celebrate(data);
       }
