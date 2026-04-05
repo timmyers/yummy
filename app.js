@@ -16,6 +16,19 @@ const GREETINGS = {
 
 const MEAL_MILESTONES = [1, 3, 5, 10, 15, 25, 50, 75, 100];
 
+const REMINDER_MESSAGES = [
+  "Hey lovely, it's been a while! Your garden misses you 🌸",
+  "Time for a little snack? Even something small helps your garden grow 🦋",
+  "Your flowers are getting thirsty — feed them with a yummy bite! 🌺",
+  "A little nourishment goes a long way 💖",
+];
+
+const CONTEXTUAL_PROMPTS = {
+  morning_no_meals: "Start your day with something nourishing! 🌅",
+  afternoon_no_meals: "Don't forget to eat, beautiful! Your garden is waiting 🌷",
+  evening_few_meals: "Still time to nurture yourself tonight 🌙",
+};
+
 // ===== Data Management =====
 
 function loadData() {
@@ -65,14 +78,29 @@ function getStreak(data) {
 
 // ===== Rendering =====
 
-function renderGreeting() {
+function renderGreeting(data) {
   const hour = new Date().getHours();
   let period = 'morning';
   if (hour >= 12 && hour < 17) period = 'afternoon';
   else if (hour >= 17) period = 'evening';
 
-  const greetings = GREETINGS[period];
-  const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+  const todayMeals = data ? getTodayMeals(data) : [];
+  let greeting = null;
+
+  // Show contextual eating prompts when appropriate
+  if (period === 'morning' && todayMeals.length === 0 && hour >= 7) {
+    greeting = CONTEXTUAL_PROMPTS.morning_no_meals;
+  } else if (period === 'afternoon' && todayMeals.length === 0) {
+    greeting = CONTEXTUAL_PROMPTS.afternoon_no_meals;
+  } else if (period === 'evening' && todayMeals.length <= 1) {
+    greeting = CONTEXTUAL_PROMPTS.evening_few_meals;
+  }
+
+  if (!greeting) {
+    const greetings = GREETINGS[period];
+    greeting = greetings[Math.floor(Math.random() * greetings.length)];
+  }
+
   document.getElementById('greeting').textContent = greeting;
 }
 
@@ -347,17 +375,69 @@ function addMeal(name) {
   return data;
 }
 
+// ===== Meal Reminder System =====
+
+let reminderDismissed = false;
+
+function checkMealReminder() {
+  if (reminderDismissed) return;
+
+  const data = loadData();
+  const todayMeals = getTodayMeals(data);
+  const reminderEl = document.getElementById('meal-reminder');
+  const reminderText = document.getElementById('reminder-text');
+
+  // If no meals today and it's past 9am, show a nudge
+  const now = new Date();
+  const hour = now.getHours();
+
+  if (todayMeals.length === 0 && hour >= 9) {
+    const message = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];
+    reminderText.textContent = message;
+    reminderEl.classList.remove('hidden');
+    return;
+  }
+
+  // If there are meals, check if the last one was 3+ hours ago
+  if (todayMeals.length > 0) {
+    const lastMealTime = new Date(todayMeals[todayMeals.length - 1].time);
+    const hoursSince = (now - lastMealTime) / (1000 * 60 * 60);
+
+    if (hoursSince >= 3) {
+      const message = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];
+      reminderText.textContent = message;
+      reminderEl.classList.remove('hidden');
+      return;
+    }
+  }
+
+  // Otherwise hide it
+  reminderEl.classList.add('hidden');
+}
+
+function dismissReminder() {
+  reminderDismissed = true;
+  document.getElementById('meal-reminder').classList.add('hidden');
+}
+
 // ===== Event Handlers =====
 
 function init() {
   const data = loadData();
 
   createBgElements();
-  renderGreeting();
+  renderGreeting(data);
   renderStats(data);
   renderTodayMeals(data);
   renderGarden(data);
   renderWeekly(data);
+
+  // Meal reminder system
+  checkMealReminder();
+  setInterval(checkMealReminder, 60000);
+
+  // Dismiss reminder button
+  document.getElementById('reminder-dismiss').addEventListener('click', dismissReminder);
 
   // Form submit
   const form = document.getElementById('meal-form');
@@ -376,10 +456,15 @@ function init() {
     input.value = '';
     input.focus();
 
+    // Reset reminder state when a meal is logged
+    reminderDismissed = false;
+
     renderStats(data);
     renderTodayMeals(data);
     renderGarden(data);
     renderWeekly(data);
+    renderGreeting(data);
+    checkMealReminder();
     celebrate(data);
   });
 
@@ -389,10 +474,15 @@ function init() {
       const meal = pick.getAttribute('data-meal');
       const data = addMeal(meal);
 
+      // Reset reminder state when a meal is logged
+      reminderDismissed = false;
+
       renderStats(data);
       renderTodayMeals(data);
       renderGarden(data);
       renderWeekly(data);
+      renderGreeting(data);
+      checkMealReminder();
       celebrate(data);
     });
   });
