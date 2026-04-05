@@ -782,6 +782,175 @@ function showShareMilestone(totalMeals) {
   });
 }
 
+// ===== Push Notifications =====
+
+const NOTIF_STORAGE_KEY = 'yummy-garden-notifs';
+
+function getNotifSettings() {
+  try {
+    const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return { enabled: false, intervalHours: 3 };
+}
+
+function saveNotifSettings(settings) {
+  localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(settings));
+}
+
+async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return null;
+  try {
+    const reg = await navigator.serviceWorker.register('/sw.js');
+    return reg;
+  } catch (e) {
+    console.error('SW registration failed:', e);
+    return null;
+  }
+}
+
+async function enableNotifications() {
+  if (!('Notification' in window)) {
+    showToast('Notifications not supported in this browser 😢');
+    return false;
+  }
+
+  let permission = Notification.permission;
+  if (permission === 'denied') {
+    showToast('Notifications are blocked. Please enable them in your browser settings 🔔');
+    return false;
+  }
+
+  if (permission !== 'granted') {
+    permission = await Notification.requestPermission();
+  }
+
+  if (permission !== 'granted') {
+    showToast('Notifications permission needed to send reminders 🌸');
+    return false;
+  }
+
+  const reg = await registerServiceWorker();
+  if (!reg) {
+    showToast('Could not set up reminders 😢');
+    return false;
+  }
+
+  const settings = getNotifSettings();
+  settings.enabled = true;
+  saveNotifSettings(settings);
+
+  // Tell the service worker to schedule reminders
+  if (reg.active) {
+    reg.active.postMessage({
+      type: 'SCHEDULE_REMINDER',
+      intervalMs: settings.intervalHours * 60 * 60 * 1000,
+    });
+  }
+
+  // Wait for SW to activate if it's installing
+  if (reg.installing || reg.waiting) {
+    const sw = reg.installing || reg.waiting;
+    sw.addEventListener('statechange', () => {
+      if (sw.state === 'activated') {
+        sw.postMessage({
+          type: 'SCHEDULE_REMINDER',
+          intervalMs: settings.intervalHours * 60 * 60 * 1000,
+        });
+      }
+    });
+  }
+
+  return true;
+}
+
+function disableNotifications() {
+  const settings = getNotifSettings();
+  settings.enabled = false;
+  saveNotifSettings(settings);
+
+  // Unregister service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (reg) reg.unregister();
+    });
+  }
+}
+
+function renderNotifToggle() {
+  const settings = getNotifSettings();
+  const toggle = document.getElementById('notif-toggle');
+  const intervalRow = document.getElementById('notif-interval-row');
+  const intervalSelect = document.getElementById('notif-interval');
+  const statusEl = document.getElementById('notif-status');
+
+  if (settings.enabled && Notification.permission === 'granted') {
+    toggle.classList.add('active');
+    intervalRow.classList.remove('hidden');
+    statusEl.textContent = `Reminders every ${settings.intervalHours} hours 🌸`;
+  } else {
+    toggle.classList.remove('active');
+    intervalRow.classList.add('hidden');
+    statusEl.textContent = 'Get gentle nudges to eat throughout the day';
+  }
+
+  intervalSelect.value = String(settings.intervalHours);
+}
+
+function initNotifications() {
+  const toggle = document.getElementById('notif-toggle');
+  const intervalSelect = document.getElementById('notif-interval');
+  const settings = getNotifSettings();
+
+  // Re-register SW if notifications were previously enabled
+  if (settings.enabled && Notification.permission === 'granted') {
+    registerServiceWorker().then((reg) => {
+      if (reg && reg.active) {
+        reg.active.postMessage({
+          type: 'SCHEDULE_REMINDER',
+          intervalMs: settings.intervalHours * 60 * 60 * 1000,
+        });
+      }
+    });
+  }
+
+  renderNotifToggle();
+
+  toggle.addEventListener('click', async () => {
+    const settings = getNotifSettings();
+    if (settings.enabled) {
+      disableNotifications();
+      showToast('Reminders turned off 🌙');
+    } else {
+      const success = await enableNotifications();
+      if (success) {
+        showToast('Reminders are on! Your garden will nudge you 🌸');
+      }
+    }
+    renderNotifToggle();
+  });
+
+  intervalSelect.addEventListener('change', () => {
+    const settings = getNotifSettings();
+    settings.intervalHours = parseInt(intervalSelect.value, 10);
+    saveNotifSettings(settings);
+    renderNotifToggle();
+
+    // Update SW interval
+    if (settings.enabled) {
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        if (reg && reg.active) {
+          reg.active.postMessage({
+            type: 'SCHEDULE_REMINDER',
+            intervalMs: settings.intervalHours * 60 * 60 * 1000,
+          });
+        }
+      });
+    }
+    showToast(`Reminders set to every ${settings.intervalHours} hours 🔔`);
+  });
+}
+
 // ===== Event Handlers =====
 
 function init() {
@@ -805,6 +974,9 @@ function init() {
 
   // Share garden button
   document.getElementById('share-btn').addEventListener('click', shareGarden);
+
+  // Push notifications
+  initNotifications();
 
   // Form submit
   const form = document.getElementById('meal-form');

@@ -855,6 +855,91 @@ header h1 {
   to { opacity: 0; transform: translateY(20px); }
 }
 
+/* ===== Settings / Notifications ===== */
+.settings-card {
+  background: linear-gradient(135deg, #FFF9F0, #FFF0F5);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.setting-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.setting-desc {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+.notif-toggle {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  border-radius: 14px;
+  border: none;
+  background: #ddd;
+  cursor: pointer;
+  transition: background 0.3s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.notif-toggle.active {
+  background: linear-gradient(135deg, var(--pink), var(--peach));
+}
+
+.notif-toggle-dot {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  transition: transform 0.3s;
+}
+
+.notif-toggle.active .notif-toggle-dot {
+  transform: translateX(22px);
+}
+
+.notif-interval-row {
+  padding-top: 0;
+}
+
+.notif-interval-row.hidden {
+  display: none;
+}
+
+.notif-select {
+  padding: 0.4rem 0.75rem;
+  border: 2px solid rgba(255, 182, 193, 0.4);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  background: white;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+}
+
+.notif-select:focus {
+  border-color: var(--pink);
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 540px) {
   #app {
