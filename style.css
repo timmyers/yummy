@@ -1540,6 +1540,15 @@ header h1 {
   to { opacity: 1; transform: translateY(0); max-height: 200px; }
 }
 
+/* ===== Version Indicator ===== */
+.version-indicator {
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(141, 110, 99, 0.35);
+  padding: 0.5rem 0 0;
+  letter-spacing: 0.02em;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 540px) {
   #app {
