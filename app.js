@@ -43,6 +43,14 @@ const ACHIEVEMENTS = [
   { id: 'night_owl', name: 'Night Owl Nourisher', emoji: '🦉', hint: 'Log a meal after 8pm', category: 'variety', bg: '#F0F0FF', glow: 'rgba(140,120,200,0.2)' },
 ];
 
+const MOOD_EMOJIS = {
+  great: '😊',
+  good: '🙂',
+  okay: '😌',
+  low: '😔',
+  tired: '😴',
+};
+
 const CONTEXTUAL_PROMPTS = {
   morning_no_meals: "Start your day with something nourishing! 🌅",
   afternoon_no_meals: "Don't forget to eat, beautiful! Your garden is waiting 🌷",
@@ -144,9 +152,10 @@ function renderTodayMeals(data) {
   list.innerHTML = meals.map((meal, i) => {
     const icon = getMealIcon(meal.name);
     const time = new Date(meal.time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    const moodDisplay = meal.mood && MOOD_EMOJIS[meal.mood] ? `<span class="mood-emoji-display">${MOOD_EMOJIS[meal.mood]}</span>` : '';
     return `<li class="meal-item" style="animation-delay: ${i * 0.05}s">
       <span class="meal-icon">${icon}</span>
-      <span>${escapeHtml(meal.name)}</span>
+      <span>${escapeHtml(meal.name)}${moodDisplay}</span>
       <span class="meal-time">${time}</span>
     </li>`;
   }).join('');
@@ -462,6 +471,34 @@ function renderInsights(data) {
     });
   }
 
+  // Weekly mood summary
+  const moodCounts = {};
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = getDateKey(d);
+    const dayMeals = data.meals[key] || [];
+    dayMeals.forEach(m => {
+      if (m.mood) {
+        moodCounts[m.mood] = (moodCounts[m.mood] || 0) + 1;
+      }
+    });
+  }
+  let topMood = null;
+  let topMoodCount = 0;
+  for (const [mood, count] of Object.entries(moodCounts)) {
+    if (count > topMoodCount) {
+      topMoodCount = count;
+      topMood = mood;
+    }
+  }
+  if (topMood && topMoodCount >= 1 && MOOD_EMOJIS[topMood]) {
+    insights.push({
+      text: `You felt mostly ${MOOD_EMOJIS[topMood]} this week — eating well suits you! 🌸`,
+      style: 'mint',
+    });
+  }
+
   if (insights.length === 0) {
     container.innerHTML = '<span class="insight-pill">Start logging meals to see your insights! ✨</span>';
     return;
@@ -506,9 +543,10 @@ function renderAccordion(data) {
       bodyContent = '<ul class="meal-list">' + dayMeals.map(meal => {
         const icon = getMealIcon(meal.name);
         const time = new Date(meal.time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        const moodDisplay = meal.mood && MOOD_EMOJIS[meal.mood] ? `<span class="mood-emoji-display">${MOOD_EMOJIS[meal.mood]}</span>` : '';
         return `<li>
           <span class="meal-icon">${icon}</span>
-          <span>${escapeHtml(meal.name)}</span>
+          <span>${escapeHtml(meal.name)}${moodDisplay}</span>
           <span class="meal-time">${time}</span>
         </li>`;
       }).join('') + '</ul>';
@@ -1293,6 +1331,71 @@ function initHydration() {
   });
 }
 
+// ===== Mood Check-in =====
+
+let moodAutoTimer = null;
+
+function showMoodPrompt() {
+  const prompt = document.getElementById('mood-prompt');
+  if (!prompt) return;
+  prompt.classList.remove('hidden');
+
+  // Clear any existing auto-dismiss timer
+  if (moodAutoTimer) clearTimeout(moodAutoTimer);
+
+  // Auto-dismiss after 8 seconds
+  moodAutoTimer = setTimeout(() => {
+    dismissMoodPrompt();
+  }, 8000);
+}
+
+function dismissMoodPrompt() {
+  const prompt = document.getElementById('mood-prompt');
+  if (!prompt) return;
+  prompt.classList.add('hidden');
+  if (moodAutoTimer) {
+    clearTimeout(moodAutoTimer);
+    moodAutoTimer = null;
+  }
+  // Remove selected state from all mood buttons
+  prompt.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+}
+
+function saveMoodToLastMeal(mood) {
+  const data = loadData();
+  const key = getDateKey();
+  const todayMeals = data.meals[key];
+  if (todayMeals && todayMeals.length > 0) {
+    todayMeals[todayMeals.length - 1].mood = mood;
+    saveData(data);
+    renderTodayMeals(data);
+    renderHistory(data);
+  }
+}
+
+function initMoodPrompt() {
+  const prompt = document.getElementById('mood-prompt');
+  if (!prompt) return;
+
+  // Mood emoji button clicks
+  prompt.querySelectorAll('.mood-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mood = btn.getAttribute('data-mood');
+      btn.classList.add('selected');
+      saveMoodToLastMeal(mood);
+      setTimeout(() => dismissMoodPrompt(), 300);
+    });
+  });
+
+  // Skip button
+  const skipBtn = document.getElementById('mood-skip');
+  if (skipBtn) {
+    skipBtn.addEventListener('click', () => {
+      dismissMoodPrompt();
+    });
+  }
+}
+
 // ===== Event Handlers =====
 
 function init() {
@@ -1324,6 +1427,9 @@ function init() {
 
   // Share garden button
   document.getElementById('share-btn').addEventListener('click', shareGarden);
+
+  // Mood check-in
+  initMoodPrompt();
 
   // Push notifications
   initNotifications();
@@ -1382,6 +1488,7 @@ function init() {
       celebrate(data);
     }
     showShareMilestone(data.totalMeals);
+    showMoodPrompt();
   });
 
   // Quick picks
@@ -1424,6 +1531,7 @@ function init() {
         celebrate(data);
       }
       showShareMilestone(data.totalMeals);
+      showMoodPrompt();
     });
   });
 }
