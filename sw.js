@@ -1,5 +1,5 @@
 // Yummy Garden Service Worker
-const CACHE_NAME = 'yummy-garden-v1';
+const CACHE_NAME = 'yummy-garden-v2';
 const STORAGE_KEY = 'yummy-garden-data';
 
 const NOTIFICATION_MESSAGES = [
@@ -37,12 +37,19 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Serve from cache, fallback to network
+// Network-first: always try to fetch fresh, fall back to cache for offline
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((response) => {
+        // Cache the fresh response for offline use
+        if (response.ok && event.request.method === 'GET') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
 
