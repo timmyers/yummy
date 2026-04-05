@@ -573,6 +573,20 @@ function getMotivationalMessage(totalMeals) {
   return 'Just started my garden journey! 🌸';
 }
 
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
 function generateShareCard(data) {
   const canvas = document.createElement('canvas');
   const w = 600;
@@ -653,31 +667,48 @@ function generateShareCard(data) {
     ctx.fillText(plantStr, w / 2, gardenY);
   }
 
-  // Green garden ground area
-  const groundY = 220;
-  const groundH = 140;
-  const groundGrad = ctx.createLinearGradient(0, groundY, 0, groundY + groundH);
-  groundGrad.addColorStop(0, 'rgba(144, 238, 144, 0.3)');
-  groundGrad.addColorStop(1, 'rgba(107, 142, 90, 0.2)');
-  ctx.fillStyle = groundGrad;
-  ctx.fillRect(40, groundY, w - 80, groundH);
+  // Garden scene area — sky + ground with scattered plants
+  const sceneY = 210;
+  const sceneH = 150;
 
-  // Scatter more plants in the garden area if we have many
-  if (plants.length > 3) {
-    ctx.font = '28px "Segoe UI", system-ui, sans-serif';
-    const scatterPlants = plants.slice(0, Math.min(12, plants.length));
-    scatterPlants.forEach((p, i) => {
+  // Sky
+  const skyGrad = ctx.createLinearGradient(0, sceneY, 0, sceneY + sceneH * 0.5);
+  skyGrad.addColorStop(0, 'rgba(135, 206, 235, 0.25)');
+  skyGrad.addColorStop(1, 'rgba(176, 224, 255, 0.15)');
+  ctx.fillStyle = skyGrad;
+  roundRect(ctx, 40, sceneY, w - 80, sceneH, 14);
+  ctx.fill();
+
+  // Green ground
+  const groundTop = sceneY + sceneH * 0.5;
+  const groundGrad = ctx.createLinearGradient(0, groundTop, 0, sceneY + sceneH);
+  groundGrad.addColorStop(0, 'rgba(144, 238, 144, 0.5)');
+  groundGrad.addColorStop(1, 'rgba(107, 180, 90, 0.4)');
+  ctx.fillStyle = groundGrad;
+  ctx.fillRect(40, groundTop, w - 80, sceneH * 0.5);
+
+  // Scatter plants in the scene
+  ctx.textAlign = 'center';
+  if (plants.length > 0) {
+    ctx.font = '26px "Segoe UI", system-ui, sans-serif';
+    const scatterPlants = plants.slice(-Math.min(15, plants.length));
+    scatterPlants.forEach((p) => {
       const px = 70 + (p.x / 100) * (w - 140);
-      const py = groundY + 20 + (p.y / 25) * (groundH - 40);
+      const py = groundTop - 5 + (p.y / 25) * (sceneH * 0.45);
       ctx.fillText(p.emoji, px, py);
     });
+  } else {
+    // Empty garden — show a seed
+    ctx.font = '20px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#8D6E63';
+    ctx.fillText('🌱 Your garden is just beginning!', w / 2, sceneY + sceneH / 2 + 8);
   }
 
   // Motivational message
   ctx.font = 'italic 18px "Segoe UI", system-ui, sans-serif';
   ctx.fillStyle = '#8D6E63';
   ctx.textAlign = 'center';
-  ctx.fillText(getMotivationalMessage(data.totalMeals), w / 2, 400);
+  ctx.fillText(getMotivationalMessage(data.totalMeals), w / 2, 410);
 
   // Footer
   ctx.font = '14px "Segoe UI", system-ui, sans-serif';
