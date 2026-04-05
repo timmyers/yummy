@@ -896,18 +896,22 @@ header h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 105;
+  z-index: 9999;
   pointer-events: none;
-  background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 70%);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 1;
+  transition: opacity 0.4s ease-out;
 }
 
-.achievement-celebration.hidden {
-  display: none;
+.achievement-celebration.fade-out {
+  opacity: 0;
 }
 
 .achievement-celebration-content {
   text-align: center;
-  animation: celebrationPop 2.2s ease-out forwards;
+  animation: achContentPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .achievement-celebration-content .ach-emoji {
@@ -1078,6 +1082,11 @@ header h1 {
   0% { transform: scale(0) rotate(-20deg); }
   60% { transform: scale(1.4) rotate(10deg); }
   100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes achContentPop {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 /* Confetti particles */

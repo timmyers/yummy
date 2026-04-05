@@ -335,7 +335,7 @@ function showAchievementCelebration(achievementId) {
   const badge = ACHIEVEMENTS.find(b => b.id === achievementId);
   if (!badge) return;
 
-  // Create overlay
+  // Create overlay appended to body so it doesn't affect page flow
   const overlay = document.createElement('div');
   overlay.className = 'achievement-celebration';
   overlay.innerHTML = `<div class="achievement-celebration-content">
@@ -343,11 +343,17 @@ function showAchievementCelebration(achievementId) {
     <span class="ach-label">Achievement Unlocked!</span>
     <span class="ach-name">${badge.name}</span>
   </div>`;
-  document.getElementById('app').appendChild(overlay);
+  document.body.appendChild(overlay);
 
   spawnConfetti();
 
-  setTimeout(() => overlay.remove(), 2500);
+  // Start fade-out after 2.1s, then remove after fade completes
+  setTimeout(() => {
+    overlay.classList.add('fade-out');
+    overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
+    // Fallback removal if transitionend doesn't fire
+    setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 500);
+  }, 2100);
 }
 
 // ===== Garden Seasons =====
