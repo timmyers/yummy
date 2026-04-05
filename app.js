@@ -1569,6 +1569,74 @@ function initMoodPrompt() {
   }
 }
 
+// ===== Post-Meal Flow =====
+// Sequential: achievement > goal > normal celebration, then mood prompt, then share milestone.
+// Only one celebration type fires. Mood and share are queued after it finishes.
+
+function handlePostMeal(data, oldTotal) {
+  // Reset reminder state when a meal is logged
+  reminderDismissed = false;
+
+  // Re-render everything
+  renderStats(data);
+  renderTodayMeals(data);
+  renderGarden(data);
+  renderWeekly(data);
+  renderHistory(data);
+  renderGreeting(data);
+  renderDailyGoal(data);
+  checkMealReminder();
+
+  // Check what happened
+  const newBadges = checkAchievements(data);
+  saveData(data);
+  renderAchievements(data, newBadges);
+
+  const goalReached = checkGoalCelebration(data);
+  const newSeason = checkSeasonTransition(oldTotal, data.totalMeals);
+
+  // Determine which single celebration to show and how long it lasts.
+  // Priority: achievement > goal > season transition > normal celebration.
+  let celebrationDuration = 0;
+
+  if (newBadges.length > 0) {
+    // Show only the first achievement badge (the most important one)
+    showAchievementCelebration(newBadges[0]);
+    celebrationDuration = 2600;
+  } else if (goalReached) {
+    celebrateGoalComplete();
+    celebrationDuration = 2200;
+  } else if (newSeason) {
+    celebrateSeasonTransition(newSeason);
+    celebrationDuration = 2200;
+  } else {
+    celebrate(data);
+    celebrationDuration = 1800;
+  }
+
+  // Mood prompt appears after the celebration finishes (~2s buffer)
+  setTimeout(() => {
+    showMoodPrompt();
+
+    // Share milestone appears after mood prompt dismisses or is skipped.
+    // The mood prompt auto-dismisses after 8s, but the user might interact sooner.
+    // We observe the mood prompt hiding, then show the share milestone.
+    const moodEl = document.getElementById('mood-prompt');
+    if (moodEl && !moodEl.classList.contains('hidden')) {
+      const observer = new MutationObserver(() => {
+        if (moodEl.classList.contains('hidden')) {
+          observer.disconnect();
+          setTimeout(() => showShareMilestone(data.totalMeals), 300);
+        }
+      });
+      observer.observe(moodEl, { attributes: true, attributeFilter: ['class'] });
+    } else {
+      // Mood prompt didn't appear — show share milestone directly
+      setTimeout(() => showShareMilestone(data.totalMeals), 300);
+    }
+  }, celebrationDuration + 200);
+}
+
 // ===== Event Handlers =====
 
 function init() {
@@ -1629,55 +1697,7 @@ function init() {
     input.value = '';
     input.focus();
 
-    // Reset reminder state when a meal is logged
-    reminderDismissed = false;
-
-    renderStats(data);
-    renderTodayMeals(data);
-    renderGarden(data);
-    renderWeekly(data);
-    renderHistory(data);
-    renderGreeting(data);
-    renderDailyGoal(data);
-    checkMealReminder();
-
-    // Check achievements
-    const newBadges = checkAchievements(data);
-    saveData(data);
-    renderAchievements(data, newBadges);
-
-    // Check daily goal celebration first
-    const goalReached = checkGoalCelebration(data);
-
-    // Check season transition
-    const newSeason = checkSeasonTransition(oldTotal, data.totalMeals);
-
-    if (newBadges.length > 0) {
-      // Show achievement celebration instead of normal one for first badge
-      let delay = 0;
-      newBadges.forEach((id, i) => {
-        setTimeout(() => showAchievementCelebration(id), delay);
-        delay += 2600;
-      });
-      // If goal also reached, celebrate after achievements
-      if (goalReached) {
-        setTimeout(() => celebrateGoalComplete(), newBadges.length * 2600);
-      }
-      if (newSeason) {
-        setTimeout(() => celebrateSeasonTransition(newSeason), newBadges.length * 2600 + (goalReached ? 2400 : 0));
-      }
-    } else if (goalReached) {
-      celebrateGoalComplete();
-      if (newSeason) {
-        setTimeout(() => celebrateSeasonTransition(newSeason), 2400);
-      }
-    } else if (newSeason) {
-      celebrateSeasonTransition(newSeason);
-    } else {
-      celebrate(data);
-    }
-    showShareMilestone(data.totalMeals);
-    showMoodPrompt();
+    handlePostMeal(data, oldTotal);
   });
 
   // Quick picks
@@ -1687,52 +1707,7 @@ function init() {
       const oldTotal = loadData().totalMeals || 0;
       const data = addMeal(meal);
 
-      // Reset reminder state when a meal is logged
-      reminderDismissed = false;
-
-      renderStats(data);
-      renderTodayMeals(data);
-      renderGarden(data);
-      renderWeekly(data);
-      renderGreeting(data);
-      renderDailyGoal(data);
-      checkMealReminder();
-
-      // Check achievements
-      const newBadges = checkAchievements(data);
-      saveData(data);
-      renderAchievements(data, newBadges);
-
-      // Check daily goal celebration first
-      const goalReached = checkGoalCelebration(data);
-
-      // Check season transition
-      const newSeason = checkSeasonTransition(oldTotal, data.totalMeals);
-
-      if (newBadges.length > 0) {
-        let delay = 0;
-        newBadges.forEach((id, i) => {
-          setTimeout(() => showAchievementCelebration(id), delay);
-          delay += 2600;
-        });
-        if (goalReached) {
-          setTimeout(() => celebrateGoalComplete(), newBadges.length * 2600);
-        }
-        if (newSeason) {
-          setTimeout(() => celebrateSeasonTransition(newSeason), newBadges.length * 2600 + (goalReached ? 2400 : 0));
-        }
-      } else if (goalReached) {
-        celebrateGoalComplete();
-        if (newSeason) {
-          setTimeout(() => celebrateSeasonTransition(newSeason), 2400);
-        }
-      } else if (newSeason) {
-        celebrateSeasonTransition(newSeason);
-      } else {
-        celebrate(data);
-      }
-      showShareMilestone(data.totalMeals);
-      showMoodPrompt();
+      handlePostMeal(data, oldTotal);
     });
   });
 }

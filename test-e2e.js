@@ -286,10 +286,10 @@ async function run() {
     await page.reload({ waitUntil: 'domcontentloaded' });
     await wait(300);
 
-    // Log a meal and check that mood prompt appears
+    // Log a meal and check that mood prompt appears (delayed after celebration)
     await page.type('#meal-input', 'Avocado toast');
     await page.click('#plant-btn');
-    await wait(500);
+    await wait(3500);
 
     const moodPromptVisible = await page.$eval('#mood-prompt', el => !el.classList.contains('hidden'));
     assert(moodPromptVisible, 'Mood prompt appears after logging a meal');
@@ -305,9 +305,9 @@ async function run() {
     const mealListHtml = await page.$eval('#today-meals', el => el.innerHTML);
     assert(mealListHtml.includes('😊'), 'Mood emoji appears next to meal in today\'s list');
 
-    // Test mood prompt with quick pick and skip
+    // Test mood prompt with quick pick and skip (delayed after celebration)
     await page.click('.quick-pick[data-meal="🍓 Strawberries"]');
-    await wait(500);
+    await wait(3500);
 
     const moodPromptVisible2 = await page.$eval('#mood-prompt', el => !el.classList.contains('hidden'));
     assert(moodPromptVisible2, 'Mood prompt appears after quick pick meal');
