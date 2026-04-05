@@ -420,6 +420,212 @@ function dismissReminder() {
   document.getElementById('meal-reminder').classList.add('hidden');
 }
 
+// ===== Toast Notification System =====
+
+function showToast(message, duration = 3000) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add('toast-out');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// ===== Share Your Garden =====
+
+const SHARE_MILESTONES = [10, 25, 50, 100];
+
+function getMotivationalMessage(totalMeals) {
+  if (totalMeals >= 100) return 'A legendary garden keeper! 👑';
+  if (totalMeals >= 50) return 'My garden is thriving beautifully! 🌈';
+  if (totalMeals >= 25) return 'Growing stronger every day! 🌻';
+  if (totalMeals >= 10) return 'Watch my garden bloom! 🌷';
+  if (totalMeals >= 5) return 'My garden is coming to life! 🌱';
+  return 'Just started my garden journey! 🌸';
+}
+
+function generateShareCard(data) {
+  const canvas = document.createElement('canvas');
+  const w = 600;
+  const h = 480;
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+
+  // Soft pastel gradient background
+  const bg = ctx.createLinearGradient(0, 0, w, h);
+  bg.addColorStop(0, '#FFF0F5');
+  bg.addColorStop(0.3, '#FDE8EF');
+  bg.addColorStop(0.6, '#FFF9F0');
+  bg.addColorStop(1, '#F0FFF0');
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  // Rounded rect
+  const r = 24;
+  ctx.moveTo(r, 0);
+  ctx.lineTo(w - r, 0);
+  ctx.quadraticCurveTo(w, 0, w, r);
+  ctx.lineTo(w, h - r);
+  ctx.quadraticCurveTo(w, h, w - r, h);
+  ctx.lineTo(r, h);
+  ctx.quadraticCurveTo(0, h, 0, h - r);
+  ctx.lineTo(0, r);
+  ctx.quadraticCurveTo(0, 0, r, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  // Subtle decorative border
+  ctx.strokeStyle = 'rgba(255, 182, 193, 0.4)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Header
+  ctx.font = 'bold 32px "Segoe UI", system-ui, sans-serif';
+  ctx.fillStyle = '#FF6B9D';
+  ctx.textAlign = 'center';
+  ctx.fillText('My Yummy Garden \uD83C\uDF38', w / 2, 55);
+
+  // Divider line
+  const divGrad = ctx.createLinearGradient(100, 0, w - 100, 0);
+  divGrad.addColorStop(0, 'rgba(255,107,157,0)');
+  divGrad.addColorStop(0.5, 'rgba(255,107,157,0.4)');
+  divGrad.addColorStop(1, 'rgba(255,107,157,0)');
+  ctx.strokeStyle = divGrad;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(100, 75);
+  ctx.lineTo(w - 100, 75);
+  ctx.stroke();
+
+  // Stats
+  const streak = getStreak(data);
+  const plants = data.gardenPlants || [];
+  const numButterflies = Math.min(5, Math.floor(data.totalMeals / 3));
+
+  ctx.font = '20px "Segoe UI", system-ui, sans-serif';
+  ctx.fillStyle = '#5D4037';
+  ctx.textAlign = 'center';
+
+  const statsY = 115;
+  const stats = [
+    `\uD83C\uDF7D\uFE0F ${data.totalMeals} meals`,
+    `\uD83D\uDD25 ${streak} day streak`,
+    `\uD83C\uDF38 ${plants.length} flowers`,
+    `\uD83E\uDD8B ${numButterflies} butterflies`,
+  ];
+  ctx.fillText(stats.join('   \u00B7   '), w / 2, statsY);
+
+  // Garden plants row
+  const gardenY = 180;
+  const displayPlants = plants.slice(-15); // Show last 15
+  if (displayPlants.length > 0) {
+    ctx.font = '36px "Segoe UI", system-ui, sans-serif';
+    const plantStr = displayPlants.map(p => p.emoji).join(' ');
+    ctx.fillText(plantStr, w / 2, gardenY);
+  }
+
+  // Green garden ground area
+  const groundY = 220;
+  const groundH = 140;
+  const groundGrad = ctx.createLinearGradient(0, groundY, 0, groundY + groundH);
+  groundGrad.addColorStop(0, 'rgba(144, 238, 144, 0.3)');
+  groundGrad.addColorStop(1, 'rgba(107, 142, 90, 0.2)');
+  ctx.fillStyle = groundGrad;
+  ctx.fillRect(40, groundY, w - 80, groundH);
+
+  // Scatter more plants in the garden area if we have many
+  if (plants.length > 3) {
+    ctx.font = '28px "Segoe UI", system-ui, sans-serif';
+    const scatterPlants = plants.slice(0, Math.min(12, plants.length));
+    scatterPlants.forEach((p, i) => {
+      const px = 70 + (p.x / 100) * (w - 140);
+      const py = groundY + 20 + (p.y / 25) * (groundH - 40);
+      ctx.fillText(p.emoji, px, py);
+    });
+  }
+
+  // Motivational message
+  ctx.font = 'italic 18px "Segoe UI", system-ui, sans-serif';
+  ctx.fillStyle = '#8D6E63';
+  ctx.textAlign = 'center';
+  ctx.fillText(getMotivationalMessage(data.totalMeals), w / 2, 400);
+
+  // Footer
+  ctx.font = '14px "Segoe UI", system-ui, sans-serif';
+  ctx.fillStyle = '#B0B0B0';
+  ctx.fillText('Grow your own garden at yummygarden.app \uD83E\uDD8B', w / 2, h - 25);
+
+  return canvas;
+}
+
+async function shareGarden() {
+  const data = loadData();
+  const canvas = generateShareCard(data);
+
+  try {
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const file = new File([blob], 'my-yummy-garden.png', { type: 'image/png' });
+
+    // Try Web Share API (mobile)
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: 'My Yummy Garden',
+        text: 'Check out my garden!',
+        files: [file],
+      });
+      showToast('Shared your garden! 💖');
+      return;
+    }
+  } catch (e) {
+    // User cancelled share or API not available — fall through to download
+    if (e.name === 'AbortError') return;
+  }
+
+  // Fallback: download the image
+  const url = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'my-yummy-garden.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('Saved to share! 💖');
+}
+
+function showShareMilestone(totalMeals) {
+  if (!SHARE_MILESTONES.includes(totalMeals)) return;
+
+  const el = document.getElementById('share-milestone');
+  const textEl = document.getElementById('share-milestone-text');
+  textEl.textContent = `You hit ${totalMeals} meals! Share your blooming garden? 🌺`;
+  el.classList.remove('hidden');
+
+  // Auto-dismiss after 10 seconds
+  const timeout = setTimeout(() => el.classList.add('hidden'), 10000);
+
+  // Wire up the buttons (remove old listeners by cloning)
+  const yesBtn = document.getElementById('share-milestone-yes');
+  const dismissBtn = document.getElementById('share-milestone-dismiss');
+  const newYes = yesBtn.cloneNode(true);
+  const newDismiss = dismissBtn.cloneNode(true);
+  yesBtn.parentNode.replaceChild(newYes, yesBtn);
+  dismissBtn.parentNode.replaceChild(newDismiss, dismissBtn);
+
+  newYes.addEventListener('click', () => {
+    clearTimeout(timeout);
+    el.classList.add('hidden');
+    shareGarden();
+  });
+  newDismiss.addEventListener('click', () => {
+    clearTimeout(timeout);
+    el.classList.add('hidden');
+  });
+}
+
 // ===== Event Handlers =====
 
 function init() {
@@ -438,6 +644,9 @@ function init() {
 
   // Dismiss reminder button
   document.getElementById('reminder-dismiss').addEventListener('click', dismissReminder);
+
+  // Share garden button
+  document.getElementById('share-btn').addEventListener('click', shareGarden);
 
   // Form submit
   const form = document.getElementById('meal-form');
@@ -466,6 +675,7 @@ function init() {
     renderGreeting(data);
     checkMealReminder();
     celebrate(data);
+    showShareMilestone(data.totalMeals);
   });
 
   // Quick picks
@@ -484,6 +694,7 @@ function init() {
       renderGreeting(data);
       checkMealReminder();
       celebrate(data);
+      showShareMilestone(data.totalMeals);
     });
   });
 }

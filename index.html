@@ -82,6 +82,9 @@
           <span id="flower-count">🌸 0 flowers</span>
           <span id="butterfly-count">🦋 0 butterflies</span>
         </div>
+        <div class="share-btn-wrap">
+          <button type="button" id="share-btn" class="share-btn">Share 💌</button>
+        </div>
       </section>
 
       <!-- Today's meals -->
@@ -106,6 +109,20 @@
         <p id="celebration-text">Your garden grew!</p>
       </div>
     </div>
+
+    <!-- Share milestone prompt -->
+    <div id="share-milestone" class="share-milestone hidden">
+      <div class="share-milestone-content">
+        <p id="share-milestone-text"></p>
+        <div class="share-milestone-actions">
+          <button type="button" id="share-milestone-yes" class="share-btn">Share 💌</button>
+          <button type="button" id="share-milestone-dismiss" class="share-milestone-dismiss">Maybe later</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" class="toast-container"></div>
   </div>
 
   <script src="app.js"></script>
