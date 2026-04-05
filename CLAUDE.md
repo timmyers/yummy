@@ -10,7 +10,9 @@ Yummy Garden is a single-page static app (HTML/CSS/JS) that gamifies meal tracki
 - `style.css` — All styles, CSS custom properties in `:root`
 - `app.js` — All logic, localStorage for persistence
 
-No build step, no frameworks, no dependencies. Keep it that way.
+No build step, no frameworks, no runtime dependencies. Keep it that way.
+- `sw.js` — Service Worker for push notifications and offline caching
+- `test-e2e.js` — Puppeteer E2E smoke tests (dev dependency only)
 
 ## Design Principles
 
@@ -28,6 +30,10 @@ No build step, no frameworks, no dependencies. Keep it that way.
 - Emoji-heavy UI — use emoji for icons rather than icon libraries
 - Mobile-first responsive design
 - Respect `prefers-reduced-motion`
+
+## Testing
+
+Run `npm test` to execute E2E smoke tests (requires Puppeteer). Tests simulate a real user session: logging meals, checking garden growth, verifying achievements, persistence, and responsive layout. Always run tests after making changes.
 
 ## Deploy
 
