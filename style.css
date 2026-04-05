@@ -252,19 +252,19 @@ header h1 {
 .daily-goal {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  padding: 0.65rem 0.75rem;
-  margin-bottom: 0.75rem;
+  gap: 0.65rem;
+  padding: 0.5rem 0.65rem;
+  margin-bottom: 0.5rem;
   background: linear-gradient(135deg, #FFF8FA, #FFF5F0);
   border: 1px solid rgba(255, 182, 193, 0.25);
-  border-radius: 16px;
+  border-radius: 14px;
 }
 
 .goal-ring-wrap {
   position: relative;
   flex-shrink: 0;
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
 }
 
 .goal-ring {
@@ -290,14 +290,14 @@ header h1 {
 }
 
 .goal-count {
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--text);
   line-height: 1.1;
 }
 
 .goal-label {
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   color: var(--text-light);
   line-height: 1.1;
 }
@@ -308,9 +308,9 @@ header h1 {
 }
 
 .goal-message {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   color: var(--text);
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 /* Goal completed state */
@@ -339,11 +339,10 @@ header h1 {
 /* ===== Hydration Tracker ===== */
 .hydration-tracker {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.75rem;
+  gap: 0.5rem;
+  padding: 0.4rem 0.65rem;
+  margin-bottom: 0.5rem;
   background: linear-gradient(135deg, #F0F8FF, #E8F4FD);
   border: 1px solid rgba(116, 192, 252, 0.25);
   border-radius: 14px;
@@ -351,7 +350,7 @@ header h1 {
 
 .hydration-drops {
   display: inline-flex;
-  gap: 0.3rem;
+  gap: 0.2rem;
   align-items: center;
 }
 
@@ -359,9 +358,9 @@ header h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  font-size: 1.1rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  font-size: 0.95rem;
   border-radius: 50%;
   cursor: pointer;
   background: #E8E8E8;
@@ -523,14 +522,22 @@ header h1 {
 /* Quick picks */
 .quick-picks {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.4rem;
-  margin-top: 0.75rem;
+  margin-top: 0.6rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 0.2rem;
+}
+
+.quick-picks::-webkit-scrollbar {
+  display: none;
 }
 
 .quick-pick {
   font-size: 1.5rem;
   padding: 0.3rem 0.5rem;
+  flex-shrink: 0;
   background: rgba(255, 255, 255, 0.8);
   border: 2px solid rgba(255, 182, 193, 0.2);
   border-radius: 12px;
