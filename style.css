@@ -903,6 +903,46 @@ header h1 {
   color: var(--text-light);
 }
 
+/* ===== Collapsible Sections ===== */
+.collapsible-heading {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.section-chevron {
+  font-size: 0.7rem;
+  color: var(--text-light);
+  transition: transform 0.3s ease;
+  margin-left: auto;
+}
+
+.collapsible-heading.open .section-chevron {
+  transform: rotate(180deg);
+}
+
+.collapsible-summary {
+  font-size: 0.82rem;
+  color: var(--text-light);
+  display: none;
+}
+
+.collapsible-heading:not(.open) + .collapsible-summary {
+  display: block;
+}
+
+.collapsible-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.collapsible-body.open {
+  max-height: 800px;
+}
+
 /* ===== Achievements / Badges ===== */
 .achievements-card {
   background: linear-gradient(135deg, #FFF9F0 0%, #FFF0F5 50%, #F0F0FF 100%);

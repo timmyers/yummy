@@ -375,6 +375,13 @@ function renderAchievements(data, newlyUnlockedIds) {
       </div>`;
     }
   }).join('');
+
+  // Update collapsed summary
+  const summaryEl = document.getElementById('achievements-summary');
+  if (summaryEl) {
+    const count = Object.keys(data.achievements || {}).length;
+    summaryEl.textContent = count + ' of ' + ACHIEVEMENTS.length + ' unlocked';
+  }
 }
 
 function showAchievementCelebration(achievementId) {
@@ -797,6 +804,34 @@ function renderAccordion(data) {
       const wasOpen = item.classList.contains('open');
       item.classList.toggle('open');
       header.setAttribute('aria-expanded', !wasOpen);
+    });
+  });
+}
+
+// ===== Collapsible Sections =====
+
+function initCollapsibleSections(data) {
+  const stored = JSON.parse(localStorage.getItem('yummy-collapsed-sections') || '{}');
+  document.querySelectorAll('.collapsible-heading').forEach(heading => {
+    const section = heading.dataset.section;
+    const body = document.getElementById(section + '-body');
+    const isOpen = stored[section] === true;
+    if (isOpen) { heading.classList.add('open'); body.classList.add('open'); }
+
+    // Achievements summary
+    if (section === 'achievements') {
+      const count = Object.keys(data.achievements || {}).length;
+      const el = document.getElementById('achievements-summary');
+      if (el) el.textContent = count + ' of ' + ACHIEVEMENTS.length + ' unlocked';
+    }
+
+    heading.addEventListener('click', () => {
+      const opening = !heading.classList.contains('open');
+      heading.classList.toggle('open');
+      body.classList.toggle('open');
+      const state = JSON.parse(localStorage.getItem('yummy-collapsed-sections') || '{}');
+      state[section] = opening;
+      localStorage.setItem('yummy-collapsed-sections', JSON.stringify(state));
     });
   });
 }
@@ -1857,6 +1892,7 @@ function init() {
   renderAchievements(data, []);
   renderWeekly(data);
   renderHistory(data);
+  initCollapsibleSections(data);
 
   // Daily goal
   renderDailyGoal(data);
