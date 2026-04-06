@@ -224,7 +224,7 @@ header h1 {
   font-size: 0.92rem;
   color: var(--text);
   line-height: 1.4;
-  animation: reminderFadeIn 0.5s ease-out forwards;
+  animation: slideDownFadeIn 0.5s ease-out forwards;
 }
 
 .meal-reminder.hidden {
@@ -249,7 +249,7 @@ header h1 {
   background: rgba(255, 107, 157, 0.1);
 }
 
-@keyframes reminderFadeIn {
+@keyframes slideDownFadeIn {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
@@ -647,13 +647,6 @@ header h1 {
   height: 280px;
   border-radius: 16px;
   overflow: hidden;
-  background: linear-gradient(180deg,
-    #87CEEB 0%,
-    #B0E0FF 40%,
-    #90EE90 60%,
-    #7BC67B 65%,
-    #6B8E5A 100%
-  );
 }
 
 #garden-ground {
@@ -687,10 +680,6 @@ header h1 {
   );
 }
 
-#garden.season-summer .sun-face {
-  font-size: 3rem;
-}
-
 #garden.season-autumn {
   background: linear-gradient(180deg,
     #E8913A 0%,
@@ -709,11 +698,6 @@ header h1 {
     #F0F0F8 65%,
     #FFFFFF 100%
   );
-}
-
-.season-spring ~ .garden-ground-override,
-#garden.season-spring #garden-ground {
-  background: linear-gradient(180deg, #90EE90 0%, #7BC67B 30%, #6B8E5A 100%);
 }
 
 #garden.season-summer #garden-ground {
@@ -767,26 +751,17 @@ header h1 {
 
 /* Season label badge */
 .season-label {
+  display: block;
   text-align: center;
-  margin-top: 0.4rem;
+  margin: 0.4rem auto 0;
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-light);
   background: linear-gradient(135deg, rgba(255, 240, 245, 0.8), rgba(240, 255, 240, 0.8));
-  display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 50px;
   border: 1px solid rgba(255, 182, 193, 0.25);
-  margin-left: auto;
-  margin-right: auto;
   width: fit-content;
-}
-
-.garden-card .season-label {
-  display: block;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 #garden-plots {
@@ -1044,21 +1019,6 @@ header h1 {
   color: var(--pink);
   margin-top: 0.25rem;
   text-shadow: 0 1px 10px rgba(255, 255, 255, 0.8);
-}
-
-@media (max-width: 540px) {
-  .badges-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.4rem;
-  }
-
-  .badge-emoji {
-    font-size: 1.5rem;
-  }
-
-  .badge-name {
-    font-size: 0.65rem;
-  }
 }
 
 /* ===== Meal List ===== */
@@ -1586,10 +1546,6 @@ header h1 {
   padding: 0.4rem 0.85rem 0.7rem;
 }
 
-.accordion-body-inner .meal-list {
-  list-style: none;
-}
-
 .accordion-body-inner .meal-list li {
   padding: 0.4rem 0;
   border-bottom: 1px solid rgba(255, 182, 193, 0.1);
@@ -1730,16 +1686,11 @@ header h1 {
   margin-top: 0.5rem;
   box-shadow: 0 4px 20px var(--shadow), 0 1px 3px rgba(0,0,0,0.04);
   border: 1px solid rgba(255, 182, 193, 0.2);
-  animation: changelogSlide 0.3s ease-out;
+  animation: slideDownFadeIn 0.3s ease-out;
 }
 
 .changelog.hidden {
   display: none;
-}
-
-@keyframes changelogSlide {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .changelog-header {
@@ -1830,6 +1781,18 @@ header h1 {
   .rainbow-band {
     width: calc(350px - var(--i) * 40px);
     height: calc(175px - var(--i) * 20px);
+  }
+
+  .badges-grid {
+    gap: 0.4rem;
+  }
+
+  .badge-emoji {
+    font-size: 1.5rem;
+  }
+
+  .badge-name {
+    font-size: 0.65rem;
   }
 }
 
