@@ -1,5 +1,3 @@
-// ===== Yummy Garden App =====
-
 const STORAGE_KEY = 'yummy-garden-data';
 
 const FLOWERS = ['🌸', '🌺', '🌻', '🌷', '🌹', '💐', '🌼', '💮', '🏵️'];
@@ -22,24 +20,19 @@ const REMINDER_MESSAGES = [
   "A little nourishment goes a long way 💖",
 ];
 
-// ===== Achievements Definitions =====
-
 const ACHIEVEMENTS = [
-  // Eating consistency
-  { id: 'first_bloom', name: 'First Bloom', emoji: '🌱', hint: 'Log your first meal', category: 'consistency', bg: '#FFF0F5', glow: 'rgba(255,107,157,0.2)' },
-  { id: 'garden_starter', name: 'Garden Starter', emoji: '🌿', hint: 'Log 5 meals', category: 'consistency', bg: '#F0FFF0', glow: 'rgba(107,203,119,0.2)' },
-  { id: 'budding_gardener', name: 'Budding Gardener', emoji: '🌷', hint: 'Log 15 meals', category: 'consistency', bg: '#FFF0F8', glow: 'rgba(247,131,172,0.2)' },
-  { id: 'green_thumb', name: 'Green Thumb', emoji: '🌻', hint: 'Log 50 meals', category: 'consistency', bg: '#FFFFF0', glow: 'rgba(255,217,61,0.2)' },
-  { id: 'master_gardener', name: 'Master Gardener', emoji: '👑', hint: 'Log 100 meals', category: 'consistency', bg: '#FFF8F0', glow: 'rgba(255,160,122,0.2)' },
-  // Streak-based
-  { id: 'sunshine_day', name: 'Sunshine Day', emoji: '☀️', hint: '1 day streak', category: 'streak', bg: '#FFFDE8', glow: 'rgba(255,217,61,0.2)' },
-  { id: 'week_of_wellness', name: 'Week of Wellness', emoji: '🌈', hint: '7 day streak', category: 'streak', bg: '#F0F0FF', glow: 'rgba(177,151,252,0.2)' },
-  { id: 'fortnight_flora', name: 'Fortnight Flora', emoji: '🌺', hint: '14 day streak', category: 'streak', bg: '#FFF0F5', glow: 'rgba(255,107,157,0.2)' },
-  { id: 'monthly_bloom', name: 'Monthly Bloom', emoji: '💐', hint: '30 day streak', category: 'streak', bg: '#F8F0FF', glow: 'rgba(177,151,252,0.25)' },
-  // Variety
-  { id: 'rainbow_plate', name: 'Rainbow Plate', emoji: '🌈', hint: '5 different meals in one day', category: 'variety', bg: '#F0F8FF', glow: 'rgba(116,192,252,0.2)' },
-  { id: 'early_bird', name: 'Early Bird', emoji: '🐦', hint: 'Log a meal before 9am', category: 'variety', bg: '#FFF8E8', glow: 'rgba(255,200,0,0.2)' },
-  { id: 'night_owl', name: 'Night Owl Nourisher', emoji: '🦉', hint: 'Log a meal after 8pm', category: 'variety', bg: '#F0F0FF', glow: 'rgba(140,120,200,0.2)' },
+  { id: 'first_bloom', name: 'First Bloom', emoji: '🌱', hint: 'Log your first meal', bg: '#FFF0F5', glow: 'rgba(255,107,157,0.2)' },
+  { id: 'garden_starter', name: 'Garden Starter', emoji: '🌿', hint: 'Log 5 meals', bg: '#F0FFF0', glow: 'rgba(107,203,119,0.2)' },
+  { id: 'budding_gardener', name: 'Budding Gardener', emoji: '🌷', hint: 'Log 15 meals', bg: '#FFF0F8', glow: 'rgba(247,131,172,0.2)' },
+  { id: 'green_thumb', name: 'Green Thumb', emoji: '🌻', hint: 'Log 50 meals', bg: '#FFFFF0', glow: 'rgba(255,217,61,0.2)' },
+  { id: 'master_gardener', name: 'Master Gardener', emoji: '👑', hint: 'Log 100 meals', bg: '#FFF8F0', glow: 'rgba(255,160,122,0.2)' },
+  { id: 'sunshine_day', name: 'Sunshine Day', emoji: '☀️', hint: '1 day streak', bg: '#FFFDE8', glow: 'rgba(255,217,61,0.2)' },
+  { id: 'week_of_wellness', name: 'Week of Wellness', emoji: '🌈', hint: '7 day streak', bg: '#F0F0FF', glow: 'rgba(177,151,252,0.2)' },
+  { id: 'fortnight_flora', name: 'Fortnight Flora', emoji: '🌺', hint: '14 day streak', bg: '#FFF0F5', glow: 'rgba(255,107,157,0.2)' },
+  { id: 'monthly_bloom', name: 'Monthly Bloom', emoji: '💐', hint: '30 day streak', bg: '#F8F0FF', glow: 'rgba(177,151,252,0.25)' },
+  { id: 'rainbow_plate', name: 'Rainbow Plate', emoji: '🌈', hint: '5 different meals in one day', bg: '#F0F8FF', glow: 'rgba(116,192,252,0.2)' },
+  { id: 'early_bird', name: 'Early Bird', emoji: '🐦', hint: 'Log a meal before 9am', bg: '#FFF8E8', glow: 'rgba(255,200,0,0.2)' },
+  { id: 'night_owl', name: 'Night Owl Nourisher', emoji: '🦉', hint: 'Log a meal after 8pm', bg: '#F0F0FF', glow: 'rgba(140,120,200,0.2)' },
 ];
 
 const MOOD_EMOJIS = {
@@ -61,8 +54,6 @@ const COMEBACK_MESSAGES = [
   "Every day is a fresh start! Let's grow together 🌱",
   "You came back — that's what matters most 💖",
 ];
-
-// ===== Daily Affirmations =====
 
 const AFFIRMATIONS = [
   "🌷 Nourishing my body is an act of love 💗",
@@ -98,28 +89,20 @@ const AFFIRMATIONS = [
   "🌈 I am enough, and I deserve to feel wonderful 🌈",
 ];
 
-function getDailyAffirmation() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  return AFFIRMATIONS[dayOfYear % AFFIRMATIONS.length];
-}
-
 function renderAffirmation() {
   const el = document.getElementById('affirmation-text');
-  if (el) el.textContent = getDailyAffirmation();
+  if (!el) return;
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  el.textContent = AFFIRMATIONS[dayOfYear % AFFIRMATIONS.length];
 }
-
-// ===== Haptic Feedback =====
 
 function haptic() {
   try {
     if (navigator.vibrate) navigator.vibrate(10);
   } catch (_) { /* gracefully ignore */ }
 }
-
-// ===== Data Management =====
 
 function loadData() {
   try {
@@ -169,19 +152,6 @@ function getStreak(data) {
   return streak;
 }
 
-function getLastActiveDate(data) {
-  const today = new Date();
-  for (let i = 0; i < 365; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const key = getDateKey(d);
-    if (data.meals[key] && data.meals[key].length > 0) return i;
-  }
-  return -1;
-}
-
-// ===== Rendering =====
-
 function renderGreeting(data) {
   const hour = new Date().getHours();
   let period = 'morning';
@@ -193,7 +163,15 @@ function renderGreeting(data) {
 
   // Show warm comeback message if streak is broken but user has history
   if (data && todayMeals.length === 0) {
-    const lastActive = getLastActiveDate(data);
+    // Find how many days since last active
+    const now = new Date();
+    let lastActive = -1;
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = getDateKey(d);
+      if (data.meals[key] && data.meals[key].length > 0) { lastActive = i; break; }
+    }
     if (lastActive >= 2) {
       greeting = COMEBACK_MESSAGES[Math.floor(Math.random() * COMEBACK_MESSAGES.length)];
     }
@@ -283,7 +261,8 @@ function deleteMeal(index) {
   renderTodayMeals(data);
   renderGarden(data);
   renderWeekly(data);
-  renderHistory(data);
+  renderInsights(data);
+  renderAccordion(data);
   renderDailyGoal(data);
   renderAchievements(data, []);
   renderGreeting(data);
@@ -293,37 +272,16 @@ function deleteMeal(index) {
 
 function getMealIcon(name) {
   const lower = name.toLowerCase();
-  const iconMap = [
-    [['strawberry', 'strawberries', '🍓'], '🍓'],
-    [['blueberry', 'blueberries', '🫐'], '🫐'],
-    [['grape', 'grapes', '🍇'], '🍇'],
-    [['mango', '🥭'], '🥭'],
-    [['banana', '🍌'], '🍌'],
-    [['apple', '🍎'], '🍎'],
-    [['peach', '🍑'], '🍑'],
-    [['orange', '🍊'], '🍊'],
-    [['salad', '🥗'], '🥗'],
-    [['soup', '🍜'], '🍜'],
-    [['sandwich', '🥪'], '🥪'],
-    [['rice', '🍚'], '🍚'],
-    [['smoothie', '🥤'], '🥤'],
-    [['pasta', 'noodle', '🍝'], '🍝'],
-    [['pizza', '🍕'], '🍕'],
-    [['egg', '🍳'], '🍳'],
-    [['bread', 'toast', '🍞'], '🍞'],
-    [['cookie', 'cookies', '🍪'], '🍪'],
-    [['cake', '🎂'], '🎂'],
-    [['coffee', '☕'], '☕'],
-    [['tea', '🍵'], '🍵'],
-    [['water', '💧'], '💧'],
-    [['chicken', '🍗'], '🍗'],
-    [['fish', 'sushi', '🍣'], '🍣'],
-    [['taco', '🌮'], '🌮'],
-    [['burger', '🍔'], '🍔'],
+  const icons = [
+    ['🍓', 'strawberry', 'strawberries'], ['🫐', 'blueberry', 'blueberries'], ['🍇', 'grape', 'grapes'],
+    ['🥭', 'mango'], ['🍌', 'banana'], ['🍎', 'apple'], ['🍑', 'peach'], ['🍊', 'orange'],
+    ['🥗', 'salad'], ['🍜', 'soup'], ['🥪', 'sandwich'], ['🍚', 'rice'], ['🥤', 'smoothie'],
+    ['🍝', 'pasta', 'noodle'], ['🍕', 'pizza'], ['🍳', 'egg'], ['🍞', 'bread', 'toast'],
+    ['🍪', 'cookie', 'cookies'], ['🎂', 'cake'], ['☕', 'coffee'], ['🍵', 'tea'], ['💧', 'water'],
+    ['🍗', 'chicken'], ['🍣', 'fish', 'sushi'], ['🌮', 'taco'], ['🍔', 'burger'],
   ];
-
-  for (const [keywords, icon] of iconMap) {
-    if (keywords.some(k => lower.includes(k))) return icon;
+  for (const [icon, ...keywords] of icons) {
+    if (lower.includes(icon) || keywords.some(k => lower.includes(k))) return icon;
   }
   return '🍽️';
 }
@@ -334,16 +292,9 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// ===== Achievements System =====
-
-function ensureAchievementsData(data) {
+function checkAchievements(data) {
   if (!data.achievements) data.achievements = {};
   if (!data.uniqueMealsPerDay) data.uniqueMealsPerDay = {};
-  return data;
-}
-
-function checkAchievements(data) {
-  ensureAchievementsData(data);
   const newlyUnlocked = [];
   const streak = getStreak(data);
   const todayKey = getDateKey();
@@ -382,7 +333,8 @@ function checkAchievements(data) {
 }
 
 function renderAchievements(data, newlyUnlockedIds) {
-  ensureAchievementsData(data);
+  if (!data.achievements) data.achievements = {};
+  if (!data.uniqueMealsPerDay) data.uniqueMealsPerDay = {};
   const grid = document.getElementById('badges-grid');
   if (!grid) return;
 
@@ -445,8 +397,6 @@ function showAchievementCelebration(achievementId) {
   }, 2100);
 }
 
-// ===== Garden Seasons =====
-
 function getGardenSeason(totalMeals) {
   if (totalMeals >= 75) {
     return { id: 'winter', cssClass: 'season-winter', label: 'Winter Wonderland \u2744\uFE0F' };
@@ -456,27 +406,6 @@ function getGardenSeason(totalMeals) {
     return { id: 'summer', cssClass: 'season-summer', label: 'Summer Garden \u2600\uFE0F' };
   }
   return { id: 'spring', cssClass: 'season-spring', label: 'Spring Garden \uD83C\uDF31' };
-}
-
-function checkSeasonTransition(oldTotal, newTotal) {
-  const oldSeason = getGardenSeason(oldTotal);
-  const newSeason = getGardenSeason(newTotal);
-  if (oldSeason.id !== newSeason.id) {
-    return newSeason;
-  }
-  return null;
-}
-
-function celebrateSeasonTransition(season) {
-  const seasonData = {
-    summer: { emoji: '\u2600\uFE0F', text: 'Your garden entered Summer! \u2600\uFE0F Keep blooming!' },
-    autumn: { emoji: '\uD83C\uDF42', text: 'Autumn colors are here! \uD83C\uDF42 Beautiful progress!' },
-    winter: { emoji: '\u2744\uFE0F', text: 'Welcome to Winter Wonderland! \u2744\uFE0F You\'re incredible!' },
-  };
-  const info = seasonData[season.id];
-  if (!info) return;
-
-  showOverlay(info.emoji, info.text, 2200);
 }
 
 function renderSeasonParticles(season) {
@@ -654,11 +583,6 @@ function renderWeekly(data) {
 }
 
 // ===== Meal History & Insights =====
-
-function renderHistory(data) {
-  renderInsights(data);
-  renderAccordion(data);
-}
 
 function renderInsights(data) {
   const container = document.getElementById('history-insights');
@@ -1037,11 +961,6 @@ function checkMealReminder(data) {
   reminderEl.classList.add('hidden');
 }
 
-function dismissReminder() {
-  reminderDismissed = true;
-  document.getElementById('meal-reminder').classList.add('hidden');
-}
-
 // ===== Toast Notification System =====
 
 function showToast(message, duration = 3000) {
@@ -1060,15 +979,6 @@ function showToast(message, duration = 3000) {
 // ===== Share Your Garden =====
 
 const SHARE_MILESTONES = [10, 25, 50, 100];
-
-function getMotivationalMessage(totalMeals) {
-  if (totalMeals >= 100) return 'A legendary garden keeper! 👑';
-  if (totalMeals >= 50) return 'My garden is thriving beautifully! 🌈';
-  if (totalMeals >= 25) return 'Growing stronger every day! 🌻';
-  if (totalMeals >= 10) return 'Watch my garden bloom! 🌷';
-  if (totalMeals >= 5) return 'My garden is coming to life! 🌱';
-  return 'Just started my garden journey! 🌸';
-}
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -1205,7 +1115,13 @@ function generateShareCard(data) {
   ctx.font = 'italic 18px "Segoe UI", system-ui, sans-serif';
   ctx.fillStyle = '#8D6E63';
   ctx.textAlign = 'center';
-  ctx.fillText(getMotivationalMessage(data.totalMeals), w / 2, 410);
+  const motivMsg = data.totalMeals >= 100 ? 'A legendary garden keeper! 👑'
+    : data.totalMeals >= 50 ? 'My garden is thriving beautifully! 🌈'
+    : data.totalMeals >= 25 ? 'Growing stronger every day! 🌻'
+    : data.totalMeals >= 10 ? 'Watch my garden bloom! 🌷'
+    : data.totalMeals >= 5 ? 'My garden is coming to life! 🌱'
+    : 'Just started my garden journey! 🌸';
+  ctx.fillText(motivMsg, w / 2, 410);
 
   // Footer
   ctx.font = '14px "Segoe UI", system-ui, sans-serif';
@@ -1285,16 +1201,11 @@ const GOAL_STORAGE_KEY = 'yummy-garden-goal';
 const GOAL_RING_CIRCUMFERENCE = 2 * Math.PI * 34; // ~213.63
 
 function getGoalSettings() {
-  try {
-    const raw = localStorage.getItem(GOAL_STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {}
+  try { const r = localStorage.getItem(GOAL_STORAGE_KEY); if (r) return JSON.parse(r); } catch (e) {}
   return { dailyGoal: 3, celebratedDates: [] };
 }
 
-function saveGoalSettings(settings) {
-  localStorage.setItem(GOAL_STORAGE_KEY, JSON.stringify(settings));
-}
+function saveGoalSettings(s) { localStorage.setItem(GOAL_STORAGE_KEY, JSON.stringify(s)); }
 
 function renderDailyGoal(data) {
   const goalSettings = getGoalSettings();
@@ -1343,61 +1254,14 @@ function renderDailyGoal(data) {
   }
 }
 
-function checkGoalCelebration(data) {
-  const goalSettings = getGoalSettings();
-  const goal = goalSettings.dailyGoal;
-  const todayMeals = getTodayMeals(data);
-  const todayKey = getDateKey();
-
-  if (!goalSettings.celebratedDates) goalSettings.celebratedDates = [];
-
-  // Celebrate exactly when we hit the goal, only once per day
-  if (todayMeals.length === goal && !goalSettings.celebratedDates.includes(todayKey)) {
-    goalSettings.celebratedDates.push(todayKey);
-    // Keep only last 30 days of celebration tracking
-    if (goalSettings.celebratedDates.length > 30) {
-      goalSettings.celebratedDates = goalSettings.celebratedDates.slice(-30);
-    }
-    saveGoalSettings(goalSettings);
-    return true;
-  }
-  return false;
-}
-
-function celebrateGoalComplete() {
-  showOverlay('🌸', 'You nourished yourself beautifully today! 🌸', 2200);
-}
-
-function initGoalSettings() {
-  const goalSelect = document.getElementById('goal-select');
-  if (!goalSelect) return;
-
-  const goalSettings = getGoalSettings();
-  goalSelect.value = String(goalSettings.dailyGoal);
-
-  goalSelect.addEventListener('change', () => {
-    const goalSettings = getGoalSettings();
-    goalSettings.dailyGoal = parseInt(goalSelect.value, 10);
-    saveGoalSettings(goalSettings);
-    const data = loadData();
-    renderDailyGoal(data);
-    showToast(`Daily goal set to ${goalSettings.dailyGoal} meals 🎯`);
-  });
-}
-
 const NOTIF_STORAGE_KEY = 'yummy-garden-notifs';
 
 function getNotifSettings() {
-  try {
-    const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {}
+  try { const r = localStorage.getItem(NOTIF_STORAGE_KEY); if (r) return JSON.parse(r); } catch (e) {}
   return { enabled: false, intervalHours: 3 };
 }
 
-function saveNotifSettings(settings) {
-  localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(settings));
-}
+function saveNotifSettings(s) { localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(s)); }
 
 async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return null;
@@ -1566,24 +1430,6 @@ function initNotifications() {
   });
 }
 
-function initIOSInstallPrompt() {
-  const row = document.getElementById('ios-install-row');
-  const btn = document.getElementById('ios-install-btn');
-  if (!row || !btn) return;
-
-  // Show only on iOS Safari when NOT already in standalone mode
-  if (isIOSSafari() && !isStandaloneMode()) {
-    row.classList.remove('hidden');
-  } else {
-    row.classList.add('hidden');
-    return;
-  }
-
-  btn.addEventListener('click', () => {
-    showToast('Tap the Share button in Safari, then select "Add to Home Screen" 📲');
-  });
-}
-
 // ===== Hydration Tracker =====
 
 const HYDRATION_GOAL = 8;
@@ -1619,13 +1465,6 @@ function renderHydration(data) {
   }
 }
 
-function showRainCloud() {
-  const cloud = document.getElementById('rain-cloud');
-  if (!cloud) return;
-  cloud.classList.remove('hidden');
-  setTimeout(() => cloud.classList.add('hidden'), 3500);
-}
-
 function initHydration(data) {
   renderHydration(data);
 
@@ -1650,7 +1489,8 @@ function initHydration(data) {
       renderHydration(data);
 
       if (newCount >= HYDRATION_GOAL && currentCount < HYDRATION_GOAL) {
-        showRainCloud();
+        const cloud = document.getElementById('rain-cloud');
+        if (cloud) { cloud.classList.remove('hidden'); setTimeout(() => cloud.classList.add('hidden'), 3500); }
         showToast("Your garden got a good rain! \uD83C\uDF27\uFE0F\uD83D\uDC96");
       }
     });
@@ -1687,18 +1527,6 @@ function dismissMoodPrompt() {
   prompt.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
 }
 
-function saveMoodToLastMeal(mood) {
-  const data = loadData();
-  const key = getDateKey();
-  const todayMeals = data.meals[key];
-  if (todayMeals && todayMeals.length > 0) {
-    todayMeals[todayMeals.length - 1].mood = mood;
-    saveData(data);
-    renderTodayMeals(data);
-    renderHistory(data);
-  }
-}
-
 function initMoodPrompt() {
   const prompt = document.getElementById('mood-prompt');
   if (!prompt) return;
@@ -1709,7 +1537,19 @@ function initMoodPrompt() {
       const mood = btn.getAttribute('data-mood');
       haptic();
       btn.classList.add('selected');
-      saveMoodToLastMeal(mood);
+
+      // Save mood to last meal
+      const data = loadData();
+      const key = getDateKey();
+      const todayMeals = data.meals[key];
+      if (todayMeals && todayMeals.length > 0) {
+        todayMeals[todayMeals.length - 1].mood = mood;
+        saveData(data);
+        renderTodayMeals(data);
+        renderInsights(data);
+        renderAccordion(data);
+      }
+
       setTimeout(() => dismissMoodPrompt(), 300);
     });
   });
@@ -1736,7 +1576,8 @@ function handlePostMeal(data, oldTotal) {
   renderTodayMeals(data);
   renderGarden(data);
   renderWeekly(data);
-  renderHistory(data);
+  renderInsights(data);
+  renderAccordion(data);
   renderGreeting(data);
   renderDailyGoal(data);
   checkMealReminder(data);
@@ -1746,8 +1587,21 @@ function handlePostMeal(data, oldTotal) {
   saveData(data);
   renderAchievements(data, newBadges);
 
-  const goalReached = checkGoalCelebration(data);
-  const newSeason = checkSeasonTransition(oldTotal, data.totalMeals);
+  // Check if daily goal was just reached
+  const goalSettings = getGoalSettings();
+  const todayKey = getDateKey();
+  if (!goalSettings.celebratedDates) goalSettings.celebratedDates = [];
+  const goalReached = getTodayMeals(data).length === goalSettings.dailyGoal
+    && !goalSettings.celebratedDates.includes(todayKey);
+  if (goalReached) {
+    goalSettings.celebratedDates.push(todayKey);
+    if (goalSettings.celebratedDates.length > 30) goalSettings.celebratedDates = goalSettings.celebratedDates.slice(-30);
+    saveGoalSettings(goalSettings);
+  }
+
+  const oldSeason = getGardenSeason(oldTotal);
+  const curSeason = getGardenSeason(data.totalMeals);
+  const newSeason = oldSeason.id !== curSeason.id ? curSeason : null;
 
   // Determine which single celebration to show and how long it lasts.
   // Priority: achievement > goal > season transition > normal celebration.
@@ -1758,10 +1612,16 @@ function handlePostMeal(data, oldTotal) {
     showAchievementCelebration(newBadges[0]);
     celebrationDuration = 2600;
   } else if (goalReached) {
-    celebrateGoalComplete();
+    showOverlay('🌸', 'You nourished yourself beautifully today! 🌸', 2200);
     celebrationDuration = 2200;
   } else if (newSeason) {
-    celebrateSeasonTransition(newSeason);
+    const seasonData = {
+      summer: { emoji: '☀️', text: 'Your garden entered Summer! ☀️ Keep blooming!' },
+      autumn: { emoji: '🍂', text: 'Autumn colors are here! 🍂 Beautiful progress!' },
+      winter: { emoji: '❄️', text: 'Welcome to Winter Wonderland! ❄️ You\'re incredible!' },
+    };
+    const info = seasonData[newSeason.id];
+    if (info) showOverlay(info.emoji, info.text, 2200);
     celebrationDuration = 2200;
   } else {
     celebrate(data);
@@ -1798,8 +1658,6 @@ function handlePostMeal(data, oldTotal) {
     }
   }, celebrationDuration + 200);
 }
-
-// ===== Event Handlers =====
 
 // ===== Meal Autocomplete =====
 
@@ -1910,12 +1768,23 @@ function init() {
   renderGarden(data);
   renderAchievements(data, []);
   renderWeekly(data);
-  renderHistory(data);
+  renderInsights(data);
+  renderAccordion(data);
   initCollapsibleSections(data);
 
   // Daily goal
   renderDailyGoal(data);
-  initGoalSettings();
+  const goalSelect = document.getElementById('goal-select');
+  if (goalSelect) {
+    goalSelect.value = String(getGoalSettings().dailyGoal);
+    goalSelect.addEventListener('change', () => {
+      const gs = getGoalSettings();
+      gs.dailyGoal = parseInt(goalSelect.value, 10);
+      saveGoalSettings(gs);
+      renderDailyGoal(loadData());
+      showToast(`Daily goal set to ${gs.dailyGoal} meals 🎯`);
+    });
+  }
 
   // Hydration tracker
   initHydration(data);
@@ -1925,7 +1794,10 @@ function init() {
   setInterval(() => checkMealReminder(), 60000);
 
   // Dismiss reminder button
-  document.getElementById('reminder-dismiss').addEventListener('click', dismissReminder);
+  document.getElementById('reminder-dismiss').addEventListener('click', () => {
+    reminderDismissed = true;
+    document.getElementById('meal-reminder').classList.add('hidden');
+  });
 
   // Share garden button
   document.getElementById('share-btn').addEventListener('click', shareGarden);
@@ -1940,7 +1812,18 @@ function init() {
   initNotifications();
 
   // iOS install prompt
-  initIOSInstallPrompt();
+  const iosRow = document.getElementById('ios-install-row');
+  const iosBtn = document.getElementById('ios-install-btn');
+  if (iosRow && iosBtn) {
+    if (isIOSSafari() && !isStandaloneMode()) {
+      iosRow.classList.remove('hidden');
+      iosBtn.addEventListener('click', () => {
+        showToast('Tap the Share button in Safari, then select "Add to Home Screen" 📲');
+      });
+    } else {
+      iosRow.classList.add('hidden');
+    }
+  }
 
   // Changelog toggle
   const versionBtn = document.getElementById('version-btn');
@@ -1953,11 +1836,20 @@ function init() {
     }
   }
 
-  // Form submit
+  // Shared meal-logging handler
   const form = document.getElementById('meal-form');
   const input = document.getElementById('meal-input');
   const btn = document.getElementById('plant-btn');
 
+  function logMeal(name) {
+    const preData = loadData();
+    const oldTotal = preData.totalMeals || 0;
+    const data = addMeal(name, preData);
+    haptic();
+    handlePostMeal(data, oldTotal);
+  }
+
+  // Form submit
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const val = input.value.trim();
@@ -1966,59 +1858,42 @@ function init() {
     btn.classList.add('sparkle');
     setTimeout(() => btn.classList.remove('sparkle'), 600);
 
-    const preData = loadData();
-    const oldTotal = preData.totalMeals || 0;
-    const data = addMeal(val, preData);
-    haptic();
+    logMeal(val);
     input.value = '';
     document.getElementById('meal-suggestions').innerHTML = '';
     input.focus();
-
-    handlePostMeal(data, oldTotal);
   });
 
   // Quick picks
   document.querySelectorAll('.quick-pick').forEach(pick => {
     pick.addEventListener('click', () => {
-      const meal = pick.getAttribute('data-meal');
-      const preData = loadData();
-      const oldTotal = preData.totalMeals || 0;
-      const data = addMeal(meal, preData);
-      haptic();
-
-      handlePostMeal(data, oldTotal);
+      logMeal(pick.getAttribute('data-meal'));
     });
   });
-}
-
-// ===== First-visit welcome overlay =====
-function showWelcomeIfNew() {
-  if (localStorage.getItem(STORAGE_KEY)) return;
-  const overlay = document.getElementById('welcome-overlay');
-  if (!overlay) return;
-  overlay.classList.remove('hidden');
-
-  function dismiss() {
-    if (overlay.classList.contains('hidden')) return;
-    overlay.classList.add('fade-out');
-    setTimeout(() => overlay.classList.add('hidden'), 400);
-    clearTimeout(autoTimer);
-  }
-
-  // Also dismiss immediately when user starts interacting
-  function quickDismiss() {
-    overlay.classList.add('hidden');
-    clearTimeout(autoTimer);
-    document.removeEventListener('keydown', quickDismiss);
-  }
-  document.addEventListener('keydown', quickDismiss, { once: true });
-
-  document.getElementById('welcome-dismiss').addEventListener('click', dismiss);
-  const autoTimer = setTimeout(dismiss, 5000);
 }
 
 // Start the app
 document.addEventListener('DOMContentLoaded', () => {
   init();
-  showWelcomeIfNew();
+
+  // First-visit welcome overlay
+  if (!localStorage.getItem(STORAGE_KEY)) {
+    const overlay = document.getElementById('welcome-overlay');
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      const dismiss = () => {
+        if (overlay.classList.contains('hidden')) return;
+        overlay.classList.add('fade-out');
+        setTimeout(() => overlay.classList.add('hidden'), 400);
+        clearTimeout(autoTimer);
+      };
+      const quickDismiss = () => {
+        overlay.classList.add('hidden');
+        clearTimeout(autoTimer);
+      };
+      document.addEventListener('keydown', quickDismiss, { once: true });
+      document.getElementById('welcome-dismiss').addEventListener('click', dismiss);
+      const autoTimer = setTimeout(dismiss, 5000);
+    }
+  }
 });
