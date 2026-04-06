@@ -231,17 +231,26 @@
             <option value="5">5 meals</option>
           </select>
         </div>
+        <div class="setting-row backup-row">
+          <button type="button" id="export-btn" class="backup-btn">Export Data 📦</button>
+          <button type="button" id="import-btn" class="backup-btn">Import Data 📥</button>
+          <input type="file" id="import-file" accept=".json" class="hidden">
+        </div>
         </div>
       </section>
 
       <!-- Version & Changelog -->
-      <button type="button" class="version-indicator" id="version-btn">v1.8.7 🌸</button>
+      <button type="button" class="version-indicator" id="version-btn">v1.8.8 🌸</button>
       <div id="changelog" class="changelog hidden">
         <div class="changelog-header">
           <h3>What's New 🌸</h3>
           <button type="button" class="changelog-close" id="changelog-close">&times;</button>
         </div>
         <div class="changelog-entries">
+          <div class="changelog-entry">
+            <span class="changelog-version">v1.8.8</span>
+            <span class="changelog-text">Export & import your garden data for safe backups</span>
+          </div>
           <div class="changelog-entry">
             <span class="changelog-version">v1.8.6</span>
             <span class="changelog-text">Added section index to app.js for easier navigation</span>

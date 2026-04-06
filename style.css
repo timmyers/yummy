@@ -1524,6 +1524,36 @@ header h1 {
   border-color: var(--pink);
 }
 
+.backup-row {
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 182, 193, 0.15);
+  margin-top: 0.25rem;
+}
+
+.backup-btn {
+  padding: 0.4rem 0.9rem;
+  background: rgba(255, 182, 193, 0.15);
+  color: var(--text);
+  border: 1.5px solid rgba(255, 182, 193, 0.35);
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.backup-btn:hover {
+  background: rgba(255, 182, 193, 0.3);
+  transform: translateY(-1px);
+}
+
+.backup-btn:active {
+  transform: translateY(0);
+}
+
 /* ===== Meal History & Insights ===== */
 .history-card {
   background: linear-gradient(135deg, #FFF9F0 0%, #FFF0F5 50%, #F0FFF4 100%);

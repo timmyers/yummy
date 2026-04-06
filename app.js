@@ -2,13 +2,14 @@
 //
 // Sections:
 // - Constants & Config ......... line ~13
-// - Data Management ............ line ~120
-// - Rendering .................. line ~168
-// - Achievements ............... line ~308
-// - Garden ..................... line ~446
-// - Celebrations ............... line ~855
-// - Notifications .............. line ~1312
-// - Event Handlers & Init ...... line ~1809
+// - Data Management ............ line ~107
+// - Rendering .................. line ~155
+// - Achievements ............... line ~295
+// - Garden ..................... line ~433
+// - Celebrations ............... line ~784
+// - Notifications .............. line ~1175
+// - Data Export / Import ....... line ~1652
+// - Event Handlers & Init ...... line ~1685
 //
 
 const STORAGE_KEY = 'yummy-garden-data';
@@ -71,35 +72,20 @@ const COMEBACK_MESSAGES = [
 const AFFIRMATIONS = [
   "🌷 Nourishing my body is an act of love 💗",
   "🌸 I deserve to eat well and feel good 🌸",
-  "🎀 Every meal is a gift I give myself 🎁",
   "🦋 My body thanks me when I feed it kindly 🦋",
   "💪 I am worthy of feeling energized and strong 💪",
   "🌺 Taking care of myself is not selfish — it's essential 🌺",
-  "🌷 I choose foods that make me bloom 🌷",
   "🌻 I am grateful for every bite that fuels my day 🌻",
   "🍓 My body is my garden — I tend to it with love 🍓",
-  "🌈 Every healthy choice is a step toward my best self 🌈",
   "💖 I honor my hunger and nourish myself fully 💖",
   "🌿 I listen to my body and give it what it needs 🌿",
-  "🌸 I am blooming into the healthiest version of me 🌸",
   "☀️ Today I choose to fuel myself with kindness ☀️",
   "🍑 I am allowed to enjoy food without guilt 🍑",
-  "🌹 Eating well is how I show myself respect 🌹",
   "✨ My body deserves the best I can give it ✨",
-  "🫶 I am learning to love myself one meal at a time 🫶",
   "🌼 Food is my friend, not my enemy 🌼",
-  "🧁 Every bite I take is an investment in my wellbeing 🧁",
-  "🌙 I release all stress around eating and welcome peace 🌙",
-  "🦋 I trust my body to tell me what it needs 🦋",
   "🌸 I am proud of myself for showing up today 🌸",
-  "🌻 My worth is not measured by what I eat 🌻",
   "💐 I am growing stronger and more radiant every day 💐",
-  "🌷 Feeding myself well is a beautiful act of self-care 🌷",
-  "🍊 I celebrate every small step toward feeling good 🍊",
-  "🌺 My body is amazing and deserves amazing nourishment 🌺",
   "🪷 I am gentle with myself on this journey 🪷",
-  "🌟 Today I plant seeds of health that will bloom forever 🌟",
-  "🌈 I am enough, and I deserve to feel wonderful 🌈",
 ];
 
 function renderAffirmation() {
@@ -253,6 +239,18 @@ function renderTodayMeals(data) {
   });
 }
 
+function renderAll(data, newBadgeIds) {
+  renderStats(data);
+  renderTodayMeals(data);
+  renderGarden(data);
+  renderWeekly(data);
+  renderInsights(data);
+  renderAccordion(data);
+  renderDailyGoal(data);
+  renderAchievements(data, newBadgeIds || []);
+  renderGreeting(data);
+}
+
 function deleteMeal(index) {
   const data = loadData();
   const key = getDateKey();
@@ -269,17 +267,7 @@ function deleteMeal(index) {
   }
 
   saveData(data);
-
-  renderStats(data);
-  renderTodayMeals(data);
-  renderGarden(data);
-  renderWeekly(data);
-  renderInsights(data);
-  renderAccordion(data);
-  renderDailyGoal(data);
-  renderAchievements(data, []);
-  renderGreeting(data);
-
+  renderAll(data);
   showToast('Meal removed 🌿');
 }
 
@@ -624,11 +612,9 @@ function renderInsights(data) {
 
   const insights = [];
   const today = new Date();
-  let totalMealsThisWeek = 0;
-  let daysWithMeals = 0;
-  let bestDay = null;
-  let bestDayCount = 0;
-  const mealNameCounts = {};
+  let totalMealsThisWeek = 0, daysWithMeals = 0, bestDay = null, bestDayCount = 0;
+  const mealNameCounts = {}, moodCounts = {};
+  let earliestSum = 0, latestSum = 0, windowDays = 0;
 
   for (let i = 0; i < 7; i++) {
     const d = new Date(today);
@@ -637,101 +623,45 @@ function renderInsights(data) {
     const dayMeals = data.meals[key] || [];
     totalMealsThisWeek += dayMeals.length;
     if (dayMeals.length > 0) daysWithMeals++;
-
-    if (dayMeals.length > bestDayCount) {
-      bestDayCount = dayMeals.length;
-      bestDay = d;
-    }
-
+    if (dayMeals.length > bestDayCount) { bestDayCount = dayMeals.length; bestDay = d; }
     dayMeals.forEach(m => {
-      const name = m.name.trim().toLowerCase();
-      mealNameCounts[name] = (mealNameCounts[name] || 0) + 1;
+      mealNameCounts[m.name.trim().toLowerCase()] = (mealNameCounts[m.name.trim().toLowerCase()] || 0) + 1;
+      if (m.mood) moodCounts[m.mood] = (moodCounts[m.mood] || 0) + 1;
     });
+    if (dayMeals.length > 0) {
+      const hours = dayMeals.map(m => { const t = new Date(m.time); return t.getHours() + t.getMinutes() / 60; });
+      earliestSum += Math.min(...hours); latestSum += Math.max(...hours); windowDays++;
+    }
   }
 
-  // Best day insight
   if (bestDay && bestDayCount > 0) {
     const dayName = bestDay.toLocaleDateString([], { weekday: 'long' });
-    insights.push({
-      text: `Your best day was ${dayName} with ${bestDayCount} meal${bestDayCount !== 1 ? 's' : ''}! 🌸`,
-      style: '',
-    });
+    insights.push({ text: `Your best day was ${dayName} with ${bestDayCount} meal${bestDayCount !== 1 ? 's' : ''}! 🌸`, style: '' });
   }
 
-  // Favorite meal insight
-  let favMeal = null;
-  let favCount = 0;
+  let favMeal = null, favCount = 0;
   for (const [name, count] of Object.entries(mealNameCounts)) {
-    if (count > favCount) {
-      favCount = count;
-      favMeal = name;
-    }
+    if (count > favCount) { favCount = count; favMeal = name; }
   }
   if (favMeal && favCount >= 2) {
-    // Capitalize first letter
-    const display = favMeal.charAt(0).toUpperCase() + favMeal.slice(1);
-    insights.push({
-      text: `You love ${display} — ${favCount} times this week! 🍓`,
-      style: 'mint',
-    });
+    insights.push({ text: `You love ${favMeal.charAt(0).toUpperCase() + favMeal.slice(1)} — ${favCount} times this week! 🍓`, style: 'mint' });
   }
 
-  // Average meals per day
   if (daysWithMeals > 0) {
-    const avg = (totalMealsThisWeek / 7).toFixed(1);
-    insights.push({
-      text: `Averaging ${avg} meals per day this week 🌱`,
-      style: 'lavender',
-    });
+    insights.push({ text: `Averaging ${(totalMealsThisWeek / 7).toFixed(1)} meals per day this week 🌱`, style: 'lavender' });
   }
 
-  // Weekly mood summary
-  const moodCounts = {};
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const key = getDateKey(d);
-    const dayMeals = data.meals[key] || [];
-    dayMeals.forEach(m => {
-      if (m.mood) {
-        moodCounts[m.mood] = (moodCounts[m.mood] || 0) + 1;
-      }
-    });
-  }
-  let topMood = null;
-  let topMoodCount = 0;
+  let topMood = null, topMoodCount = 0;
   for (const [mood, count] of Object.entries(moodCounts)) {
-    if (count > topMoodCount) {
-      topMoodCount = count;
-      topMood = mood;
-    }
+    if (count > topMoodCount) { topMoodCount = count; topMood = mood; }
   }
   if (topMood && topMoodCount >= 1 && MOOD_EMOJIS[topMood]) {
-    insights.push({
-      text: `You felt mostly ${MOOD_EMOJIS[topMood]} this week — eating well suits you! 🌸`,
-      style: 'mint',
-    });
+    insights.push({ text: `You felt mostly ${MOOD_EMOJIS[topMood]} this week — eating well suits you! 🌸`, style: 'mint' });
   }
 
-  // Eating window insight
-  if (daysWithMeals >= 3) {
-    let earliestSum = 0, latestSum = 0, windowDays = 0;
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      const key = getDateKey(d);
-      const dayMeals = data.meals[key] || [];
-      if (dayMeals.length === 0) continue;
-      const hours = dayMeals.map(m => { const t = new Date(m.time); return t.getHours() + t.getMinutes() / 60; });
-      earliestSum += Math.min(...hours);
-      latestSum += Math.max(...hours);
-      windowDays++;
-    }
-    const fmtHour = h => { const hr = Math.round(h); const suffix = hr >= 12 ? 'pm' : 'am'; return (hr % 12 || 12) + suffix; };
-    insights.push({
-      text: `You usually eat between ${fmtHour(earliestSum / windowDays)} – ${fmtHour(latestSum / windowDays)} 🕐`,
-      style: 'lavender',
-    });
+  if (windowDays >= 3) {
+    const fmtHour = h => { const hr = Math.round(h); return (hr % 12 || 12) + (hr >= 12 ? 'pm' : 'am'); };
+    insights.push({ text: `You usually eat between ${fmtHour(earliestSum / windowDays)} – ${fmtHour(latestSum / windowDays)} 🕐`, style: 'lavender' });
   }
 
   if (insights.length === 0) {
@@ -1051,138 +981,72 @@ function roundRect(ctx, x, y, w, h, r) {
 
 function generateShareCard(data) {
   const canvas = document.createElement('canvas');
-  const w = 600;
-  const h = 480;
-  canvas.width = w;
-  canvas.height = h;
+  const w = 600, h = 480;
+  canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d');
+  const font = s => `${s} "Segoe UI", system-ui, sans-serif`;
 
-  // Soft pastel gradient background
+  // Background
   const bg = ctx.createLinearGradient(0, 0, w, h);
-  bg.addColorStop(0, '#FFF0F5');
-  bg.addColorStop(0.3, '#FDE8EF');
-  bg.addColorStop(0.6, '#FFF9F0');
-  bg.addColorStop(1, '#F0FFF0');
+  [[0,'#FFF0F5'],[0.3,'#FDE8EF'],[0.6,'#FFF9F0'],[1,'#F0FFF0']].forEach(([s,c]) => bg.addColorStop(s,c));
   ctx.fillStyle = bg;
-  ctx.beginPath();
-  // Rounded rect
-  const r = 24;
-  ctx.moveTo(r, 0);
-  ctx.lineTo(w - r, 0);
-  ctx.quadraticCurveTo(w, 0, w, r);
-  ctx.lineTo(w, h - r);
-  ctx.quadraticCurveTo(w, h, w - r, h);
-  ctx.lineTo(r, h);
-  ctx.quadraticCurveTo(0, h, 0, h - r);
-  ctx.lineTo(0, r);
-  ctx.quadraticCurveTo(0, 0, r, 0);
-  ctx.closePath();
-  ctx.fill();
-
-  // Subtle decorative border
-  ctx.strokeStyle = 'rgba(255, 182, 193, 0.4)';
-  ctx.lineWidth = 3;
-  ctx.stroke();
+  roundRect(ctx, 0, 0, w, h, 24); ctx.fill();
+  ctx.strokeStyle = 'rgba(255, 182, 193, 0.4)'; ctx.lineWidth = 3; ctx.stroke();
 
   // Header
-  ctx.font = 'bold 32px "Segoe UI", system-ui, sans-serif';
-  ctx.fillStyle = '#FF6B9D';
-  ctx.textAlign = 'center';
+  ctx.font = font('bold 32px'); ctx.fillStyle = '#FF6B9D'; ctx.textAlign = 'center';
   ctx.fillText('My Yummy Garden \uD83C\uDF38', w / 2, 55);
 
-  // Divider line
+  // Divider
   const divGrad = ctx.createLinearGradient(100, 0, w - 100, 0);
-  divGrad.addColorStop(0, 'rgba(255,107,157,0)');
-  divGrad.addColorStop(0.5, 'rgba(255,107,157,0.4)');
-  divGrad.addColorStop(1, 'rgba(255,107,157,0)');
-  ctx.strokeStyle = divGrad;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(100, 75);
-  ctx.lineTo(w - 100, 75);
-  ctx.stroke();
+  [[0,'rgba(255,107,157,0)'],[0.5,'rgba(255,107,157,0.4)'],[1,'rgba(255,107,157,0)']].forEach(([s,c]) => divGrad.addColorStop(s,c));
+  ctx.strokeStyle = divGrad; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(100, 75); ctx.lineTo(w - 100, 75); ctx.stroke();
 
   // Stats
   const streak = getStreak(data);
   const plants = data.gardenPlants || [];
-  const numButterflies = Math.min(5, Math.floor(data.totalMeals / 3));
-
-  ctx.font = '20px "Segoe UI", system-ui, sans-serif';
-  ctx.fillStyle = '#5D4037';
-  ctx.textAlign = 'center';
-
-  const statsY = 115;
-  const stats = [
-    `\uD83C\uDF7D\uFE0F ${data.totalMeals} meals`,
-    `\uD83D\uDD25 ${streak} day streak`,
-    `\uD83C\uDF38 ${plants.length} flowers`,
-    `\uD83E\uDD8B ${numButterflies} butterflies`,
-  ];
-  ctx.fillText(stats.join('   \u00B7   '), w / 2, statsY);
+  const numBf = Math.min(5, Math.floor(data.totalMeals / 3));
+  ctx.font = font('20px'); ctx.fillStyle = '#5D4037';
+  ctx.fillText([`\uD83C\uDF7D\uFE0F ${data.totalMeals} meals`,`\uD83D\uDD25 ${streak} day streak`,`\uD83C\uDF38 ${plants.length} flowers`,`\uD83E\uDD8B ${numBf} butterflies`].join('   \u00B7   '), w / 2, 115);
 
   // Garden plants row
-  const gardenY = 180;
-  const displayPlants = plants.slice(-15); // Show last 15
+  const displayPlants = plants.slice(-15);
   if (displayPlants.length > 0) {
-    ctx.font = '36px "Segoe UI", system-ui, sans-serif';
-    const plantStr = displayPlants.map(p => p.emoji).join(' ');
-    ctx.fillText(plantStr, w / 2, gardenY);
+    ctx.font = font('36px');
+    ctx.fillText(displayPlants.map(p => p.emoji).join(' '), w / 2, 180);
   }
 
-  // Garden scene area — sky + ground with scattered plants
-  const sceneY = 210;
-  const sceneH = 150;
-
-  // Sky
-  const skyGrad = ctx.createLinearGradient(0, sceneY, 0, sceneY + sceneH * 0.5);
-  skyGrad.addColorStop(0, 'rgba(135, 206, 235, 0.25)');
-  skyGrad.addColorStop(1, 'rgba(176, 224, 255, 0.15)');
-  ctx.fillStyle = skyGrad;
-  roundRect(ctx, 40, sceneY, w - 80, sceneH, 14);
-  ctx.fill();
-
-  // Green ground
-  const groundTop = sceneY + sceneH * 0.5;
+  // Garden scene
+  const sceneY = 210, sceneH = 150, groundTop = sceneY + sceneH * 0.5;
+  const skyGrad = ctx.createLinearGradient(0, sceneY, 0, groundTop);
+  skyGrad.addColorStop(0, 'rgba(135, 206, 235, 0.25)'); skyGrad.addColorStop(1, 'rgba(176, 224, 255, 0.15)');
+  ctx.fillStyle = skyGrad; roundRect(ctx, 40, sceneY, w - 80, sceneH, 14); ctx.fill();
   const groundGrad = ctx.createLinearGradient(0, groundTop, 0, sceneY + sceneH);
-  groundGrad.addColorStop(0, 'rgba(144, 238, 144, 0.5)');
-  groundGrad.addColorStop(1, 'rgba(107, 180, 90, 0.4)');
-  ctx.fillStyle = groundGrad;
-  ctx.fillRect(40, groundTop, w - 80, sceneH * 0.5);
+  groundGrad.addColorStop(0, 'rgba(144, 238, 144, 0.5)'); groundGrad.addColorStop(1, 'rgba(107, 180, 90, 0.4)');
+  ctx.fillStyle = groundGrad; ctx.fillRect(40, groundTop, w - 80, sceneH * 0.5);
 
-  // Scatter plants in the scene
   ctx.textAlign = 'center';
   if (plants.length > 0) {
-    ctx.font = '26px "Segoe UI", system-ui, sans-serif';
-    const scatterPlants = plants.slice(-Math.min(15, plants.length));
-    scatterPlants.forEach((p) => {
-      const px = 70 + (p.x / 100) * (w - 140);
-      const py = groundTop - 5 + (p.y / 25) * (sceneH * 0.45);
-      ctx.fillText(p.emoji, px, py);
+    ctx.font = font('26px');
+    plants.slice(-15).forEach(p => {
+      ctx.fillText(p.emoji, 70 + (p.x / 100) * (w - 140), groundTop - 5 + (p.y / 25) * (sceneH * 0.45));
     });
   } else {
-    // Empty garden — show a seed
-    ctx.font = '20px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#8D6E63';
+    ctx.font = font('20px'); ctx.fillStyle = '#8D6E63';
     ctx.fillText('🌱 Your garden is just beginning!', w / 2, sceneY + sceneH / 2 + 8);
   }
 
   // Motivational message
-  ctx.font = 'italic 18px "Segoe UI", system-ui, sans-serif';
-  ctx.fillStyle = '#8D6E63';
-  ctx.textAlign = 'center';
-  const motivMsg = data.totalMeals >= 100 ? 'A legendary garden keeper! 👑'
-    : data.totalMeals >= 50 ? 'My garden is thriving beautifully! 🌈'
-    : data.totalMeals >= 25 ? 'Growing stronger every day! 🌻'
-    : data.totalMeals >= 10 ? 'Watch my garden bloom! 🌷'
-    : data.totalMeals >= 5 ? 'My garden is coming to life! 🌱'
-    : 'Just started my garden journey! 🌸';
+  ctx.font = font('italic 18px'); ctx.fillStyle = '#8D6E63';
+  const t = data.totalMeals;
+  const motivMsg = t >= 100 ? 'A legendary garden keeper! 👑' : t >= 50 ? 'My garden is thriving beautifully! 🌈'
+    : t >= 25 ? 'Growing stronger every day! 🌻' : t >= 10 ? 'Watch my garden bloom! 🌷'
+    : t >= 5 ? 'My garden is coming to life! 🌱' : 'Just started my garden journey! 🌸';
   ctx.fillText(motivMsg, w / 2, 410);
 
-  // Footer
-  ctx.font = '14px "Segoe UI", system-ui, sans-serif';
-  ctx.fillStyle = '#B0B0B0';
+  ctx.font = font('14px'); ctx.fillStyle = '#B0B0B0';
   ctx.fillText('Grow your own garden at yummygarden.app \uD83E\uDD8B', w / 2, h - 25);
-
   return canvas;
 }
 
@@ -1560,25 +1424,15 @@ function showMoodPrompt() {
   const prompt = document.getElementById('mood-prompt');
   if (!prompt) return;
   prompt.classList.remove('hidden');
-
-  // Clear any existing auto-dismiss timer
   if (moodAutoTimer) clearTimeout(moodAutoTimer);
-
-  // Auto-dismiss after 8 seconds
-  moodAutoTimer = setTimeout(() => {
-    dismissMoodPrompt();
-  }, 8000);
+  moodAutoTimer = setTimeout(() => dismissMoodPrompt(), 8000);
 }
 
 function dismissMoodPrompt() {
   const prompt = document.getElementById('mood-prompt');
   if (!prompt) return;
   prompt.classList.add('hidden');
-  if (moodAutoTimer) {
-    clearTimeout(moodAutoTimer);
-    moodAutoTimer = null;
-  }
-  // Remove selected state from all mood buttons
+  if (moodAutoTimer) { clearTimeout(moodAutoTimer); moodAutoTimer = null; }
   prompt.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
 }
 
@@ -1626,21 +1480,11 @@ function handlePostMeal(data, oldTotal) {
   // Reset reminder state when a meal is logged
   reminderDismissed = false;
 
-  // Re-render everything
-  renderStats(data);
-  renderTodayMeals(data);
-  renderGarden(data);
-  renderWeekly(data);
-  renderInsights(data);
-  renderAccordion(data);
-  renderGreeting(data);
-  renderDailyGoal(data);
-  checkMealReminder(data);
-
-  // Check what happened
+  // Check what happened and re-render everything
   const newBadges = checkAchievements(data);
   saveData(data);
-  renderAchievements(data, newBadges);
+  renderAll(data, newBadges);
+  checkMealReminder(data);
 
   // Check if daily goal was just reached
   const goalSettings = getGoalSettings();
@@ -1806,6 +1650,39 @@ function initMealAutocomplete() {
   });
 }
 
+// ===== Data Export / Import =====
+
+function exportData() {
+  const backup = {};
+  const keys = [STORAGE_KEY, NOTIF_STORAGE_KEY, GOAL_STORAGE_KEY, 'yummy-collapsed-sections'];
+  keys.forEach(k => { const v = localStorage.getItem(k); if (v) backup[k] = JSON.parse(v); });
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'yummy-garden-backup.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  showToast('Backup saved! 💾');
+}
+
+function importData(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const backup = JSON.parse(reader.result);
+      // Validate: must have garden data with meals and totalMeals
+      const gardenData = backup[STORAGE_KEY];
+      if (!gardenData || !gardenData.meals || gardenData.totalMeals === undefined) {
+        showToast("Couldn't read that file 😢"); return;
+      }
+      Object.entries(backup).forEach(([k, v]) => localStorage.setItem(k, JSON.stringify(v)));
+      location.reload();
+    } catch (_) { showToast("Couldn't read that file 😢"); }
+  };
+  reader.onerror = () => showToast("Couldn't read that file 😢");
+  reader.readAsText(file);
+}
+
 function init() {
   const data = loadData();
 
@@ -1878,6 +1755,16 @@ function init() {
     } else {
       iosRow.classList.add('hidden');
     }
+  }
+
+  // Data export/import
+  const exportBtn = document.getElementById('export-btn');
+  const importBtn = document.getElementById('import-btn');
+  const importFile = document.getElementById('import-file');
+  if (exportBtn) exportBtn.addEventListener('click', exportData);
+  if (importBtn && importFile) {
+    importBtn.addEventListener('click', () => importFile.click());
+    importFile.addEventListener('change', () => { if (importFile.files[0]) importData(importFile.files[0]); });
   }
 
   // Changelog toggle
