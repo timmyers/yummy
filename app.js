@@ -1,3 +1,16 @@
+// ===== Yummy Garden App =====
+//
+// Sections:
+// - Constants & Config ......... line ~13
+// - Data Management ............ line ~120
+// - Rendering .................. line ~168
+// - Achievements ............... line ~308
+// - Garden ..................... line ~446
+// - Celebrations ............... line ~855
+// - Notifications .............. line ~1312
+// - Event Handlers & Init ...... line ~1809
+//
+
 const STORAGE_KEY = 'yummy-garden-data';
 
 const FLOWERS = ['🌸', '🌺', '🌻', '🌷', '🌹', '💐', '🌼', '💮', '🏵️'];
