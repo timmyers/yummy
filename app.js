@@ -117,7 +117,21 @@ function saveData(data) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
-    console.error('Failed to save data:', e);
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 90);
+      const cutoffKey = cutoff.toISOString().split('T')[0];
+      for (const key of Object.keys(data.meals)) {
+        if (key < cutoffKey) delete data.meals[key];
+      }
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (e2) {
+        showToast('Storage is full — oldest meals were archived 📦', 5000);
+      }
+    } else {
+      console.error('Failed to save data:', e);
+    }
   }
 }
 
