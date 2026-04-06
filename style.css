@@ -1106,16 +1106,49 @@ header h1 {
 }
 
 .week-day.today {
-  background: rgba(255, 107, 157, 0.1);
+  background: rgba(255, 107, 157, 0.12);
   border: 2px solid var(--pink);
+  box-shadow: 0 0 8px rgba(255, 107, 157, 0.3);
+  transform: scale(1.05);
+  animation: todayPulse 2.5s ease-in-out infinite;
 }
 
-.week-day.has-meals {
-  background: rgba(107, 203, 119, 0.15);
+@keyframes todayPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 107, 157, 0.3); }
+  50% { box-shadow: 0 0 14px rgba(255, 107, 157, 0.5); }
+}
+
+.week-day.meals-1 {
+  background: rgba(107, 203, 119, 0.1);
+}
+
+.week-day.meals-2 {
+  background: rgba(107, 203, 119, 0.22);
+}
+
+.week-day.meals-3 {
+  background: rgba(107, 203, 119, 0.35);
 }
 
 .week-day.no-meals {
-  opacity: 0.5;
+  opacity: 0.6;
+  border: 2px dashed rgba(0, 0, 0, 0.08);
+}
+
+.week-day.no-meals .week-day-icon::after {
+  content: '○';
+  color: rgba(0, 0, 0, 0.15);
+  font-size: 1.1rem;
+}
+
+.week-day.future-day {
+  opacity: 0.45;
+}
+
+.week-day.future-day .week-day-icon {
+  color: rgba(0, 0, 0, 0.15);
+  font-size: 1.8rem;
+  line-height: 2rem;
 }
 
 /* ===== Celebration ===== */

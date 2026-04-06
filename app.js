@@ -560,20 +560,20 @@ function renderWeekly(data) {
     const isToday = key === getDateKey();
     const isFuture = d > today;
 
-    let icon = '🌑';
+    let icon = '';
     let cls = 'no-meals';
     if (meals.length >= 3) {
       icon = '🌸';
-      cls = 'has-meals';
+      cls = 'meals-3';
     } else if (meals.length === 2) {
       icon = '🌷';
-      cls = 'has-meals';
+      cls = 'meals-2';
     } else if (meals.length === 1) {
       icon = '🌱';
-      cls = 'has-meals';
+      cls = 'meals-1';
     } else if (isFuture) {
-      icon = '✨';
-      cls = '';
+      icon = '·';
+      cls = 'future-day';
     }
 
     html += `<div class="week-day ${cls} ${isToday ? 'today' : ''}">
