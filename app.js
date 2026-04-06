@@ -4,7 +4,6 @@ const STORAGE_KEY = 'yummy-garden-data';
 
 const FLOWERS = ['🌸', '🌺', '🌻', '🌷', '🌹', '💐', '🌼', '💮', '🏵️'];
 const FRUITS = ['🍓', '🫐', '🍇', '🥭', '🍌', '🍎', '🍑', '🍊', '🍋', '🍒'];
-const BUTTERFLIES_EMOJI = ['🦋', '🦋', '🦋'];
 const PLANT_TYPES = [...FLOWERS, ...FRUITS];
 const CELEBRATION_EMOJIS = ['🌸', '🎉', '🦋', '🌈', '✨', '🌺', '💖', '🍓'];
 
@@ -144,8 +143,6 @@ function getStreak(data) {
     const key = getDateKey(d);
     if (data.meals[key] && data.meals[key].length > 0) {
       streak++;
-    } else if (i > 0) {
-      break;
     } else {
       break;
     }
@@ -189,6 +186,15 @@ function renderStats(data) {
     `🍽️ ${data.totalMeals} meal${data.totalMeals !== 1 ? 's' : ''} logged`;
 }
 
+function mealToHtml(meal) {
+  const icon = getMealIcon(meal.name);
+  const time = new Date(meal.time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const moodDisplay = meal.mood && MOOD_EMOJIS[meal.mood] ? `<span class="mood-emoji-display">${MOOD_EMOJIS[meal.mood]}</span>` : '';
+  return `<span class="meal-icon">${icon}</span>
+      <span>${escapeHtml(meal.name)}${moodDisplay}</span>
+      <span class="meal-time">${time}</span>`;
+}
+
 function renderTodayMeals(data) {
   const list = document.getElementById('today-meals');
   const meals = getTodayMeals(data);
@@ -198,16 +204,11 @@ function renderTodayMeals(data) {
     return;
   }
 
-  list.innerHTML = meals.map((meal, i) => {
-    const icon = getMealIcon(meal.name);
-    const time = new Date(meal.time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    const moodDisplay = meal.mood && MOOD_EMOJIS[meal.mood] ? `<span class="mood-emoji-display">${MOOD_EMOJIS[meal.mood]}</span>` : '';
-    return `<li class="meal-item" style="animation-delay: ${i * 0.05}s">
-      <span class="meal-icon">${icon}</span>
-      <span>${escapeHtml(meal.name)}${moodDisplay}</span>
-      <span class="meal-time">${time}</span>
-    </li>`;
-  }).join('');
+  list.innerHTML = meals.map((meal, i) =>
+    `<li class="meal-item" style="animation-delay: ${i * 0.05}s">
+      ${mealToHtml(meal)}
+    </li>`
+  ).join('');
 }
 
 function getMealIcon(name) {
@@ -520,7 +521,6 @@ function renderWeekly(data) {
     const key = getDateKey(d);
     const meals = data.meals[key] || [];
     const isToday = key === getDateKey();
-    const isPast = d < today && !isToday;
     const isFuture = d > today;
 
     let icon = '🌑';
@@ -691,16 +691,9 @@ function renderAccordion(data) {
     if (dayMeals.length === 0) {
       bodyContent = '<p class="empty-day">No meals logged this day</p>';
     } else {
-      bodyContent = '<ul class="meal-list">' + dayMeals.map(meal => {
-        const icon = getMealIcon(meal.name);
-        const time = new Date(meal.time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-        const moodDisplay = meal.mood && MOOD_EMOJIS[meal.mood] ? `<span class="mood-emoji-display">${MOOD_EMOJIS[meal.mood]}</span>` : '';
-        return `<li>
-          <span class="meal-icon">${icon}</span>
-          <span>${escapeHtml(meal.name)}${moodDisplay}</span>
-          <span class="meal-time">${time}</span>
-        </li>`;
-      }).join('') + '</ul>';
+      bodyContent = '<ul class="meal-list">' + dayMeals.map(meal =>
+        `<li>${mealToHtml(meal)}</li>`
+      ).join('') + '</ul>';
     }
 
     html += `<div class="accordion-item${isOpen ? ' open' : ''}${isToday ? ' today-item' : ''}">
@@ -798,8 +791,8 @@ function spawnConfetti() {
 
 // ===== Add Meal =====
 
-function addMeal(name) {
-  const data = loadData();
+function addMeal(name, data) {
+  if (!data) data = loadData();
   const key = getDateKey();
 
   if (!data.meals[key]) data.meals[key] = [];
@@ -845,10 +838,10 @@ function addMeal(name) {
 
 let reminderDismissed = false;
 
-function checkMealReminder() {
+function checkMealReminder(data) {
   if (reminderDismissed) return;
 
-  const data = loadData();
+  if (!data) data = loadData();
   const todayMeals = getTodayMeals(data);
   const reminderEl = document.getElementById('meal-reminder');
   const reminderText = document.getElementById('reminder-text');
@@ -1122,8 +1115,6 @@ function showShareMilestone(totalMeals) {
     el.classList.add('hidden');
   });
 }
-
-// ===== Push Notifications =====
 
 // ===== Daily Garden Goal =====
 
@@ -1482,8 +1473,7 @@ function showRainCloud() {
   setTimeout(() => cloud.classList.add('hidden'), 3500);
 }
 
-function initHydration() {
-  const data = loadData();
+function initHydration(data) {
   renderHydration(data);
 
   const drops = document.querySelectorAll('#hydration-drops .water-drop');
@@ -1594,7 +1584,7 @@ function handlePostMeal(data, oldTotal) {
   renderHistory(data);
   renderGreeting(data);
   renderDailyGoal(data);
-  checkMealReminder();
+  checkMealReminder(data);
 
   // Check what happened
   const newBadges = checkAchievements(data);
@@ -1653,7 +1643,6 @@ function init() {
 
   createBgElements();
   renderAffirmation();
-  ensureAchievementsData(data);
   renderGreeting(data);
   renderStats(data);
   renderTodayMeals(data);
@@ -1667,11 +1656,11 @@ function init() {
   initGoalSettings();
 
   // Hydration tracker
-  initHydration();
+  initHydration(data);
 
   // Meal reminder system
-  checkMealReminder();
-  setInterval(checkMealReminder, 60000);
+  checkMealReminder(data);
+  setInterval(() => checkMealReminder(), 60000);
 
   // Dismiss reminder button
   document.getElementById('reminder-dismiss').addEventListener('click', dismissReminder);
@@ -1701,8 +1690,9 @@ function init() {
     btn.classList.add('sparkle');
     setTimeout(() => btn.classList.remove('sparkle'), 600);
 
-    const oldTotal = loadData().totalMeals || 0;
-    const data = addMeal(val);
+    const preData = loadData();
+    const oldTotal = preData.totalMeals || 0;
+    const data = addMeal(val, preData);
     input.value = '';
     input.focus();
 
@@ -1713,8 +1703,9 @@ function init() {
   document.querySelectorAll('.quick-pick').forEach(pick => {
     pick.addEventListener('click', () => {
       const meal = pick.getAttribute('data-meal');
-      const oldTotal = loadData().totalMeals || 0;
-      const data = addMeal(meal);
+      const preData = loadData();
+      const oldTotal = preData.totalMeals || 0;
+      const data = addMeal(meal, preData);
 
       handlePostMeal(data, oldTotal);
     });
