@@ -4,7 +4,9 @@
   "description": "A cute, gamified meal-tracking app that helps you build healthy eating patterns by growing a virtual garden. Every meal you log makes your garden bloom!",
   "main": "app.js",
   "scripts": {
-    "test": "node test-e2e.js"
+    "test": "node test-e2e.js",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "repository": {
     "type": "git",
@@ -19,6 +21,7 @@
   },
   "homepage": "https://github.com/timmyers/yummy#readme",
   "devDependencies": {
-    "puppeteer": "^24.40.0"
+    "puppeteer": "^24.40.0",
+    "wrangler": "^4.80.0"
   }
 }
