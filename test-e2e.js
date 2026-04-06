@@ -127,6 +127,17 @@ async function run() {
     // ===== Log a Meal via Quick Pick =====
     console.log('\n🫐 Log Meal — Quick Pick');
 
+    // Age the last meal so it's outside the 30-min dedup window
+    await page.evaluate(() => {
+      const data = JSON.parse(localStorage.getItem('yummy-garden-data'));
+      const key = new Date().toISOString().split('T')[0];
+      if (data.meals[key] && data.meals[key].length > 0) {
+        const last = data.meals[key][data.meals[key].length - 1];
+        last.time = new Date(Date.now() - 31 * 60 * 1000).toISOString();
+        localStorage.setItem('yummy-garden-data', JSON.stringify(data));
+      }
+    });
+
     await page.click('.quick-pick[data-meal="🫐 Blueberries"]');
     await wait(500);
 
@@ -144,6 +155,17 @@ async function run() {
 
     // ===== Log a 3rd Meal (default goal) =====
     console.log('\n🎯 Daily Goal');
+
+    // Age the last meal so it's outside the 30-min dedup window
+    await page.evaluate(() => {
+      const data = JSON.parse(localStorage.getItem('yummy-garden-data'));
+      const key = new Date().toISOString().split('T')[0];
+      if (data.meals[key] && data.meals[key].length > 0) {
+        const last = data.meals[key][data.meals[key].length - 1];
+        last.time = new Date(Date.now() - 31 * 60 * 1000).toISOString();
+        localStorage.setItem('yummy-garden-data', JSON.stringify(data));
+      }
+    });
 
     await page.click('.quick-pick[data-meal="🥭 Mango"]');
     await wait(1000);

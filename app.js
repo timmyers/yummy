@@ -843,38 +843,54 @@ function addMeal(name, data) {
 
   if (!data.meals[key]) data.meals[key] = [];
 
-  const meal = {
-    name: name.trim(),
-    time: new Date().toISOString(),
-  };
+  const now = new Date();
+  const trimmedName = name.trim();
+  const meals = data.meals[key];
 
-  data.meals[key].push(meal);
-  data.totalMeals = (data.totalMeals || 0) + 1;
+  // Group items logged within 30 minutes into a single meal
+  const DEDUP_WINDOW_MS = 30 * 60 * 1000;
+  const lastMeal = meals.length > 0 ? meals[meals.length - 1] : null;
+  const lastMealAge = lastMeal ? (now - new Date(lastMeal.time)) : Infinity;
 
-  // Track unique meal names per day for Rainbow Plate badge
+  if (lastMeal && lastMealAge < DEDUP_WINDOW_MS) {
+    // Append to existing meal (combine names)
+    const existingNames = lastMeal.name.split(', ');
+    if (!existingNames.includes(trimmedName)) {
+      lastMeal.name += ', ' + trimmedName;
+    }
+    // Don't increment totalMeals or add a plant — same meal sitting
+  } else {
+    // New meal
+    const meal = {
+      name: trimmedName,
+      time: now.toISOString(),
+    };
+    meals.push(meal);
+    data.totalMeals = (data.totalMeals || 0) + 1;
+
+    // Add a new plant to the garden (only for new meals)
+    const plant = {
+      emoji: PLANT_TYPES[Math.floor(Math.random() * PLANT_TYPES.length)],
+      x: 5 + Math.random() * 85,
+      y: Math.random() * 25,
+      growth: 0.5 + Math.random() * 1.5,
+      swayOffset: Math.random() * 3,
+    };
+
+    if (!data.gardenPlants) data.gardenPlants = [];
+    if (data.gardenPlants.length >= 30) {
+      data.gardenPlants.shift();
+    }
+    data.gardenPlants.push(plant);
+  }
+
+  // Track unique meal names per day for Rainbow Plate badge (always)
   if (!data.uniqueMealsPerDay) data.uniqueMealsPerDay = {};
   if (!data.uniqueMealsPerDay[key]) data.uniqueMealsPerDay[key] = [];
-  const normalizedName = name.trim().toLowerCase();
+  const normalizedName = trimmedName.toLowerCase();
   if (!data.uniqueMealsPerDay[key].includes(normalizedName)) {
     data.uniqueMealsPerDay[key].push(normalizedName);
   }
-
-  // Add a new plant to the garden
-  const plant = {
-    emoji: PLANT_TYPES[Math.floor(Math.random() * PLANT_TYPES.length)],
-    x: 5 + Math.random() * 85,
-    y: Math.random() * 25,
-    growth: 0.5 + Math.random() * 1.5,
-    swayOffset: Math.random() * 3,
-  };
-
-  if (!data.gardenPlants) data.gardenPlants = [];
-
-  // Keep garden manageable (max 30 plants, remove oldest)
-  if (data.gardenPlants.length >= 30) {
-    data.gardenPlants.shift();
-  }
-  data.gardenPlants.push(plant);
 
   saveData(data);
   return data;
