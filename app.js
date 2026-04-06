@@ -509,7 +509,7 @@ function renderGarden(data) {
     el.style.animationDelay = `${i * 0.1}s`;
     el.style.zIndex = Math.floor(plant.y);
 
-    const size = 0.8 + (plant.growth || 1) * 0.4;
+    const size = (0.8 + (plant.growth || 1) * 0.4) * (plant.size || 1.0);
     el.innerHTML = `
       <div class="plant-flower" style="font-size: ${size}rem; animation-delay: ${plant.swayOffset || 0}s">${plant.emoji}</div>
       <div class="plant-stem" style="height: ${20 + (plant.growth || 1) * 10}px"></div>
@@ -925,6 +925,12 @@ function addMeal(name, data) {
     const existingNames = lastMeal.name.split(', ');
     if (!existingNames.includes(trimmedName)) {
       lastMeal.name += ', ' + trimmedName;
+      // Update the last plant's size based on item count
+      const plants = data.gardenPlants || [];
+      if (plants.length > 0) {
+        const itemCount = lastMeal.name.split(', ').length;
+        plants[plants.length - 1].size = itemCount >= 3 ? 1.3 : itemCount === 2 ? 1.15 : 1.0;
+      }
     }
     // Don't increment totalMeals or add a plant — same meal sitting
   } else {
