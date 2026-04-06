@@ -1805,3 +1805,14 @@ body:has(#app.nighttime) {
 #app.nighttime #garden.season-winter {
   background: linear-gradient(180deg, #4A4A8A 0%, #7B8CB0 35%, #D0D0E0 58%, #E0E0E8 65%, #EEEEEE 100%);
 }
+
+/* Daily summary footer */
+.daily-summary-footer {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  text-align: center;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+  list-style: none;
+}

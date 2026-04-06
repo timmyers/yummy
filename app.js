@@ -251,6 +251,18 @@ function renderTodayMeals(data) {
       deleteMeal(parseInt(btn.getAttribute('data-index'), 10));
     });
   });
+
+  // Daily summary footer
+  const totalItems = meals.reduce((n, m) => n + m.name.split(', ').length, 0);
+  const moods = meals.map(m => m.mood).filter(Boolean);
+  const moodCounts = {};
+  moods.forEach(m => moodCounts[m] = (moodCounts[m] || 0) + 1);
+  const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0];
+  const moodPart = topMood ? ` · feeling mostly ${MOOD_EMOJIS[topMood[0]]}` : '';
+  const li = document.createElement('li');
+  li.className = 'daily-summary-footer';
+  li.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''} across ${meals.length} meal${meals.length !== 1 ? 's' : ''}${moodPart}`;
+  list.appendChild(li);
 }
 
 function renderAll(data, newBadgeIds) {
