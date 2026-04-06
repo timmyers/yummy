@@ -56,6 +56,12 @@ const CONTEXTUAL_PROMPTS = {
   evening_few_meals: "Still time to nurture yourself tonight 🌙",
 };
 
+const COMEBACK_MESSAGES = [
+  "Welcome back, lovely! Your garden missed you 🌸",
+  "Every day is a fresh start! Let's grow together 🌱",
+  "You came back — that's what matters most 💖",
+];
+
 // ===== Daily Affirmations =====
 
 const AFFIRMATIONS = [
@@ -155,7 +161,23 @@ function getStreak(data) {
       break;
     }
   }
+  // Update best streak
+  if (streak > (data.bestStreak || 0)) {
+    data.bestStreak = streak;
+    saveData(data);
+  }
   return streak;
+}
+
+function getLastActiveDate(data) {
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = getDateKey(d);
+    if (data.meals[key] && data.meals[key].length > 0) return i;
+  }
+  return -1;
 }
 
 // ===== Rendering =====
@@ -169,13 +191,23 @@ function renderGreeting(data) {
   const todayMeals = data ? getTodayMeals(data) : [];
   let greeting = null;
 
+  // Show warm comeback message if streak is broken but user has history
+  if (data && todayMeals.length === 0) {
+    const lastActive = getLastActiveDate(data);
+    if (lastActive >= 2) {
+      greeting = COMEBACK_MESSAGES[Math.floor(Math.random() * COMEBACK_MESSAGES.length)];
+    }
+  }
+
   // Show contextual eating prompts when appropriate
-  if (period === 'morning' && todayMeals.length === 0 && hour >= 7) {
-    greeting = CONTEXTUAL_PROMPTS.morning_no_meals;
-  } else if (period === 'afternoon' && todayMeals.length === 0) {
-    greeting = CONTEXTUAL_PROMPTS.afternoon_no_meals;
-  } else if (period === 'evening' && todayMeals.length <= 1) {
-    greeting = CONTEXTUAL_PROMPTS.evening_few_meals;
+  if (!greeting) {
+    if (period === 'morning' && todayMeals.length === 0 && hour >= 7) {
+      greeting = CONTEXTUAL_PROMPTS.morning_no_meals;
+    } else if (period === 'afternoon' && todayMeals.length === 0) {
+      greeting = CONTEXTUAL_PROMPTS.afternoon_no_meals;
+    } else if (period === 'evening' && todayMeals.length <= 1) {
+      greeting = CONTEXTUAL_PROMPTS.evening_few_meals;
+    }
   }
 
   if (!greeting) {
@@ -188,8 +220,11 @@ function renderGreeting(data) {
 
 function renderStats(data) {
   const streak = getStreak(data);
-  document.getElementById('streak-label').textContent =
-    `🔥 ${streak} day${streak !== 1 ? 's' : ''} streak`;
+  let streakText = `🔥 ${streak} day${streak !== 1 ? 's' : ''} streak`;
+  if (streak === 0 && data.bestStreak > 1) {
+    streakText += ` (best: ${data.bestStreak} days)`;
+  }
+  document.getElementById('streak-label').textContent = streakText;
   document.getElementById('total-meals').textContent =
     `🍽️ ${data.totalMeals} meal${data.totalMeals !== 1 ? 's' : ''} logged`;
 }
