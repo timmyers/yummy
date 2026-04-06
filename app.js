@@ -1891,6 +1891,15 @@ function init() {
     setTimeout(() => btn.classList.remove('sparkle'), 600);
 
     logMeal(val);
+
+    const plants = loadData().gardenPlants || [];
+    if (plants.length > 0) {
+      const btnText = btn.querySelector('.btn-text');
+      const planted = plants[plants.length - 1].emoji;
+      btnText.textContent = `${planted} Planted!`;
+      setTimeout(() => { btnText.textContent = 'Plant it! 🌱'; }, 1000);
+    }
+
     input.value = '';
     document.getElementById('meal-suggestions').innerHTML = '';
     input.focus();
