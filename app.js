@@ -508,6 +508,39 @@ function renderGarden(data) {
       <div class="plant-stem" style="height: ${20 + (plant.growth || 1) * 10}px"></div>
       <div class="plant-leaves">🌿</div>
     `;
+
+    // Show meal tooltip on tap
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => {
+      // Remove any existing tooltip
+      const old = plots.querySelector('.plant-tooltip');
+      if (old) old.remove();
+
+      // Build tooltip text
+      let label;
+      if (plant.meal) {
+        label = plant.emoji + ' ' + plant.meal;
+        if (plant.plantedAt) {
+          const d = new Date(plant.plantedAt);
+          const timeStr = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+          label += ' · ' + timeStr;
+        }
+      } else {
+        label = 'A lovely bloom 🌸';
+      }
+
+      const tip = document.createElement('div');
+      tip.className = 'plant-tooltip';
+      tip.textContent = label;
+      el.appendChild(tip);
+
+      setTimeout(() => { tip.classList.add('plant-tooltip-visible'); }, 10);
+      setTimeout(() => {
+        tip.classList.remove('plant-tooltip-visible');
+        setTimeout(() => tip.remove(), 200);
+      }, 2500);
+    });
+
     plots.appendChild(el);
   });
 
@@ -869,12 +902,15 @@ function addMeal(name, data) {
     data.totalMeals = (data.totalMeals || 0) + 1;
 
     // Add a new plant to the garden (only for new meals)
+    const mealLabel = trimmedName.length > 20 ? trimmedName.slice(0, 20) + '...' : trimmedName;
     const plant = {
       emoji: PLANT_TYPES[Math.floor(Math.random() * PLANT_TYPES.length)],
       x: 5 + Math.random() * 85,
       y: Math.random() * 25,
       growth: 0.5 + Math.random() * 1.5,
       swayOffset: Math.random() * 3,
+      meal: mealLabel,
+      plantedAt: now.toISOString(),
     };
 
     if (!data.gardenPlants) data.gardenPlants = [];
