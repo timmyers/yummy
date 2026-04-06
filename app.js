@@ -433,25 +433,15 @@ function checkSeasonTransition(oldTotal, newTotal) {
 }
 
 function celebrateSeasonTransition(season) {
-  const messages = {
-    summer: 'Your garden entered Summer! \u2600\uFE0F Keep blooming!',
-    autumn: 'Autumn colors are here! \uD83C\uDF42 Beautiful progress!',
-    winter: 'Welcome to Winter Wonderland! \u2744\uFE0F You\'re incredible!',
+  const seasonData = {
+    summer: { emoji: '\u2600\uFE0F', text: 'Your garden entered Summer! \u2600\uFE0F Keep blooming!' },
+    autumn: { emoji: '\uD83C\uDF42', text: 'Autumn colors are here! \uD83C\uDF42 Beautiful progress!' },
+    winter: { emoji: '\u2744\uFE0F', text: 'Welcome to Winter Wonderland! \u2744\uFE0F You\'re incredible!' },
   };
-  const message = messages[season.id];
-  if (!message) return;
+  const info = seasonData[season.id];
+  if (!info) return;
 
-  const overlay = document.getElementById('celebration');
-  const emojiEl = document.getElementById('celebration-emoji');
-  const textEl = document.getElementById('celebration-text');
-
-  const emojiMap = { summer: '\u2600\uFE0F', autumn: '\uD83C\uDF42', winter: '\u2744\uFE0F' };
-  emojiEl.textContent = emojiMap[season.id] || '\uD83C\uDF38';
-  textEl.textContent = message;
-
-  overlay.classList.remove('hidden');
-  setTimeout(() => overlay.classList.add('hidden'), 2200);
-  spawnConfetti();
+  showOverlay(info.emoji, info.text, 2200);
 }
 
 function renderSeasonParticles(season) {
@@ -459,27 +449,21 @@ function renderSeasonParticles(season) {
   if (!container) return;
   container.innerHTML = '';
 
-  if (season.id === 'autumn') {
-    const leaves = ['\uD83C\uDF42', '\uD83C\uDF41', '\uD83C\uDF42', '\uD83C\uDF41'];
-    leaves.forEach((leaf, i) => {
-      const el = document.createElement('div');
-      el.className = 'season-particle autumn-leaf';
-      el.textContent = leaf;
-      el.style.left = `${15 + i * 22}%`;
-      el.style.animationDelay = `${i * 1.8}s`;
-      container.appendChild(el);
-    });
-  } else if (season.id === 'winter') {
-    const flakes = ['\u2744\uFE0F', '\u2728', '\u2744\uFE0F', '\u2728'];
-    flakes.forEach((flake, i) => {
-      const el = document.createElement('div');
-      el.className = 'season-particle winter-flake';
-      el.textContent = flake;
-      el.style.left = `${10 + i * 25}%`;
-      el.style.animationDelay = `${i * 2.1}s`;
-      container.appendChild(el);
-    });
-  }
+  const particleConfig = {
+    autumn: { items: ['\uD83C\uDF42', '\uD83C\uDF41', '\uD83C\uDF42', '\uD83C\uDF41'], className: 'autumn-leaf', startLeft: 15, spacing: 22, delay: 1.8 },
+    winter: { items: ['\u2744\uFE0F', '\u2728', '\u2744\uFE0F', '\u2728'], className: 'winter-flake', startLeft: 10, spacing: 25, delay: 2.1 },
+  };
+  const config = particleConfig[season.id];
+  if (!config) return;
+
+  config.items.forEach((item, i) => {
+    const el = document.createElement('div');
+    el.className = `season-particle ${config.className}`;
+    el.textContent = item;
+    el.style.left = `${config.startLeft + i * config.spacing}%`;
+    el.style.animationDelay = `${i * config.delay}s`;
+    container.appendChild(el);
+  });
 }
 
 // ===== Garden Rendering =====
@@ -856,17 +840,25 @@ function createBgElements() {
 
 // ===== Celebrations =====
 
-function celebrate(data) {
-  const emoji = CELEBRATION_EMOJIS[Math.floor(Math.random() * CELEBRATION_EMOJIS.length)];
+function showOverlay(emoji, text, duration) {
   const overlay = document.getElementById('celebration');
   const emojiEl = document.getElementById('celebration-emoji');
   const textEl = document.getElementById('celebration-text');
 
   emojiEl.textContent = emoji;
+  textEl.textContent = text;
 
-  // Check for milestones
+  overlay.classList.remove('hidden');
+  setTimeout(() => overlay.classList.add('hidden'), duration);
+  spawnConfetti();
+}
+
+function celebrate(data) {
+  const emoji = CELEBRATION_EMOJIS[Math.floor(Math.random() * CELEBRATION_EMOJIS.length)];
+
+  let text;
   if (MEAL_MILESTONES.includes(data.totalMeals)) {
-    textEl.textContent = `🎉 ${data.totalMeals} meals logged! Amazing!`;
+    text = `🎉 ${data.totalMeals} meals logged! Amazing!`;
   } else {
     const messages = [
       'Your garden grew! 🌱',
@@ -876,14 +868,10 @@ function celebrate(data) {
       'Garden magic! ✨',
       'Delicious choice! 🫐',
     ];
-    textEl.textContent = messages[Math.floor(Math.random() * messages.length)];
+    text = messages[Math.floor(Math.random() * messages.length)];
   }
 
-  overlay.classList.remove('hidden');
-  setTimeout(() => overlay.classList.add('hidden'), 1800);
-
-  // Confetti
-  spawnConfetti();
+  showOverlay(emoji, text, 1800);
 }
 
 function spawnConfetti() {
@@ -1342,17 +1330,7 @@ function checkGoalCelebration(data) {
 }
 
 function celebrateGoalComplete() {
-  const overlay = document.getElementById('celebration');
-  const emojiEl = document.getElementById('celebration-emoji');
-  const textEl = document.getElementById('celebration-text');
-
-  emojiEl.textContent = '🌸';
-  textEl.textContent = 'You nourished yourself beautifully today! 🌸';
-
-  overlay.classList.remove('hidden');
-  setTimeout(() => overlay.classList.add('hidden'), 2200);
-
-  spawnConfetti();
+  showOverlay('🌸', 'You nourished yourself beautifully today! 🌸', 2200);
 }
 
 function initGoalSettings() {
