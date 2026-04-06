@@ -1019,9 +1019,11 @@ function generateShareCard(data) {
   roundRect(ctx, 0, 0, w, h, 24); ctx.fill();
   ctx.strokeStyle = 'rgba(255, 182, 193, 0.4)'; ctx.lineWidth = 3; ctx.stroke();
 
-  // Header
+  // Header with season
+  const season = getGardenSeason(data.totalMeals);
+  const seasonShort = season.label.split(' ')[0]; // "Spring", "Summer", etc.
   ctx.font = font('bold 32px'); ctx.fillStyle = '#FF6B9D'; ctx.textAlign = 'center';
-  ctx.fillText('My Yummy Garden \uD83C\uDF38', w / 2, 55);
+  ctx.fillText('My Yummy Garden \uD83C\uDF38 \u00B7 ' + seasonShort, w / 2, 55);
 
   // Divider
   const divGrad = ctx.createLinearGradient(100, 0, w - 100, 0);
@@ -1029,47 +1031,40 @@ function generateShareCard(data) {
   ctx.strokeStyle = divGrad; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(100, 75); ctx.lineTo(w - 100, 75); ctx.stroke();
 
-  // Stats
+  // Stats row 1: core stats
   const streak = getStreak(data);
   const plants = data.gardenPlants || [];
   const numBf = Math.min(5, Math.floor(data.totalMeals / 3));
-  ctx.font = font('20px'); ctx.fillStyle = '#5D4037';
-  ctx.fillText([`\uD83C\uDF7D\uFE0F ${data.totalMeals} meals`,`\uD83D\uDD25 ${streak} day streak`,`\uD83C\uDF38 ${plants.length} flowers`,`\uD83E\uDD8B ${numBf} butterflies`].join('   \u00B7   '), w / 2, 115);
+  const statsRow1 = [`\uD83C\uDF7D\uFE0F ${data.totalMeals} meals`, `\uD83D\uDD25 ${streak} day streak`, `\uD83C\uDF38 ${plants.length} flowers`];
+  if (data.bestStreak > 0) statsRow1.push(`\uD83D\uDD25 Best: ${data.bestStreak} days`);
+  ctx.font = font('18px'); ctx.fillStyle = '#5D4037';
+  ctx.fillText(statsRow1.join('   \u00B7   '), w / 2, 110);
+
+  // Stats row 2: badges, hydration, butterflies
+  const badgeCount = Object.keys(data.achievements || {}).length;
+  const hydrationCount = getHydrationCount(data);
+  const statsRow2 = [`\uD83C\uDFC6 ${badgeCount}/${ACHIEVEMENTS.length} badges`, `\uD83E\uDD8B ${numBf} butterflies`];
+  if (hydrationCount > 0) statsRow2.push(`\uD83D\uDCA7 ${hydrationCount}/${HYDRATION_GOAL} glasses`);
+  ctx.font = font('18px'); ctx.fillStyle = '#5D4037';
+  ctx.fillText(statsRow2.join('   \u00B7   '), w / 2, 140);
 
   // Garden plants row
   const displayPlants = plants.slice(-15);
   if (displayPlants.length > 0) {
     ctx.font = font('36px');
-    ctx.fillText(displayPlants.map(p => p.emoji).join(' '), w / 2, 180);
-  }
-
-  // Garden scene
-  const sceneY = 210, sceneH = 150, groundTop = sceneY + sceneH * 0.5;
-  const skyGrad = ctx.createLinearGradient(0, sceneY, 0, groundTop);
-  skyGrad.addColorStop(0, 'rgba(135, 206, 235, 0.25)'); skyGrad.addColorStop(1, 'rgba(176, 224, 255, 0.15)');
-  ctx.fillStyle = skyGrad; roundRect(ctx, 40, sceneY, w - 80, sceneH, 14); ctx.fill();
-  const groundGrad = ctx.createLinearGradient(0, groundTop, 0, sceneY + sceneH);
-  groundGrad.addColorStop(0, 'rgba(144, 238, 144, 0.5)'); groundGrad.addColorStop(1, 'rgba(107, 180, 90, 0.4)');
-  ctx.fillStyle = groundGrad; ctx.fillRect(40, groundTop, w - 80, sceneH * 0.5);
-
-  ctx.textAlign = 'center';
-  if (plants.length > 0) {
-    ctx.font = font('26px');
-    plants.slice(-15).forEach(p => {
-      ctx.fillText(p.emoji, 70 + (p.x / 100) * (w - 140), groundTop - 5 + (p.y / 25) * (sceneH * 0.45));
-    });
+    ctx.fillText(displayPlants.map(p => p.emoji).join(' '), w / 2, 210);
   } else {
     ctx.font = font('20px'); ctx.fillStyle = '#8D6E63';
-    ctx.fillText('🌱 Your garden is just beginning!', w / 2, sceneY + sceneH / 2 + 8);
+    ctx.fillText('\uD83C\uDF31 Your garden is just beginning!', w / 2, 210);
   }
 
   // Motivational message
   ctx.font = font('italic 18px'); ctx.fillStyle = '#8D6E63';
   const t = data.totalMeals;
-  const motivMsg = t >= 100 ? 'A legendary garden keeper! 👑' : t >= 50 ? 'My garden is thriving beautifully! 🌈'
-    : t >= 25 ? 'Growing stronger every day! 🌻' : t >= 10 ? 'Watch my garden bloom! 🌷'
-    : t >= 5 ? 'My garden is coming to life! 🌱' : 'Just started my garden journey! 🌸';
-  ctx.fillText(motivMsg, w / 2, 410);
+  const motivMsg = t >= 100 ? 'A legendary garden keeper! \uD83D\uDC51' : t >= 50 ? 'My garden is thriving beautifully! \uD83C\uDF08'
+    : t >= 25 ? 'Growing stronger every day! \uD83C\uDF3B' : t >= 10 ? 'Watch my garden bloom! \uD83C\uDF37'
+    : t >= 5 ? 'My garden is coming to life! \uD83C\uDF31' : 'Just started my garden journey! \uD83C\uDF38';
+  ctx.fillText(motivMsg, w / 2, 310);
 
   ctx.font = font('14px'); ctx.fillStyle = '#B0B0B0';
   ctx.fillText('Grow your own garden at yummygarden.app \uD83E\uDD8B', w / 2, h - 25);
