@@ -1722,6 +1722,17 @@ function init() {
   // iOS install prompt
   initIOSInstallPrompt();
 
+  // Changelog toggle
+  const versionBtn = document.getElementById('version-btn');
+  const changelog = document.getElementById('changelog');
+  const changelogClose = document.getElementById('changelog-close');
+  if (versionBtn && changelog) {
+    versionBtn.addEventListener('click', () => changelog.classList.toggle('hidden'));
+    if (changelogClose) {
+      changelogClose.addEventListener('click', () => changelog.classList.add('hidden'));
+    }
+  }
+
   // Form submit
   const form = document.getElementById('meal-form');
   const input = document.getElementById('meal-input');

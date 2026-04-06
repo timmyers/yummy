@@ -1645,13 +1645,105 @@ header h1 {
   to { opacity: 1; transform: translateY(0); max-height: 200px; }
 }
 
-/* ===== Version Indicator ===== */
+/* ===== Version & Changelog ===== */
 .version-indicator {
+  display: block;
+  width: 100%;
   text-align: center;
   font-size: 0.7rem;
   color: rgba(141, 110, 99, 0.35);
   padding: 0.5rem 0 0;
   letter-spacing: 0.02em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  touch-action: manipulation;
+  transition: color 0.2s;
+}
+
+.version-indicator:hover,
+.version-indicator:active {
+  color: rgba(141, 110, 99, 0.6);
+}
+
+.changelog {
+  position: relative;
+  z-index: 1;
+  background: var(--soft-white);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 20px var(--shadow), 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid rgba(255, 182, 193, 0.2);
+  animation: changelogSlide 0.3s ease-out;
+}
+
+.changelog.hidden {
+  display: none;
+}
+
+@keyframes changelogSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.changelog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.changelog-header h3 {
+  font-size: 1rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.changelog-close {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 0 0.2rem;
+  line-height: 1;
+  border-radius: 50%;
+  transition: color 0.2s;
+  touch-action: manipulation;
+}
+
+.changelog-close:hover {
+  color: var(--pink);
+}
+
+.changelog-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.changelog-entry {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.changelog-version {
+  flex-shrink: 0;
+  font-weight: 600;
+  font-size: 0.7rem;
+  color: var(--pink);
+  background: rgba(255, 107, 157, 0.08);
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+}
+
+.changelog-text {
+  color: var(--text);
 }
 
 /* ===== Responsive ===== */
