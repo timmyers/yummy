@@ -499,6 +499,17 @@ function renderGarden(data) {
     plots.appendChild(el);
   });
 
+  // Render clouds (ambient sky movement)
+  const oldClouds = document.getElementById('garden').querySelectorAll('.garden-cloud');
+  oldClouds.forEach(c => c.remove());
+  [{ top: '8%', dur: '32s', delay: '0s' }, { top: '18%', dur: '38s', delay: '-14s' }, { top: '12%', dur: '28s', delay: '-8s' }].forEach(c => {
+    const span = document.createElement('span');
+    span.className = 'garden-cloud';
+    span.textContent = '☁️';
+    Object.assign(span.style, { top: c.top, animationDuration: c.dur, animationDelay: c.delay });
+    document.getElementById('garden').appendChild(span);
+  });
+
   // Render butterflies (1 per 3 meals, max 5)
   butterfliesEl.innerHTML = '';
   const numButterflies = Math.min(5, Math.floor(data.totalMeals / 3));

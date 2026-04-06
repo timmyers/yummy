@@ -1935,6 +1935,21 @@ header h1 {
   cursor: pointer;
 }
 
+/* ===== Garden Clouds ===== */
+.garden-cloud {
+  position: absolute;
+  font-size: 0.8rem;
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 1;
+  animation: cloudDrift linear infinite;
+}
+@keyframes cloudDrift {
+  from { left: -8%; }
+  to { left: 108%; }
+}
+#app.nighttime .garden-cloud { opacity: 0.15; }
+
 /* ===== Nighttime Visual Shift (after 9pm) ===== */
 #app.nighttime { --shadow: rgba(100, 80, 120, 0.15); }
 #app.nighttime ~ body,
