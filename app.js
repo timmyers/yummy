@@ -892,7 +892,8 @@ function addMeal(name, data) {
     data.uniqueMealsPerDay[key].push(normalizedName);
   }
 
-  saveData(data);
+  // Note: caller (handlePostMeal) is responsible for saving data
+  // after achievements are checked, avoiding a redundant localStorage write.
   return data;
 }
 
@@ -1771,8 +1772,14 @@ function initMealAutocomplete() {
     container.innerHTML = '';
   }
 
-  input.addEventListener('input', () => {
+  // Refresh suggestions when the input gains focus (covers new meals logged
+  // since last focus) instead of on every keystroke, avoiding a loadData()
+  // round-trip per character typed.
+  input.addEventListener('focus', () => {
     suggestions = getMealSuggestions(loadData());
+  });
+
+  input.addEventListener('input', () => {
     renderMealSuggestions(input.value.trim(), suggestions);
   });
 
