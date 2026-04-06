@@ -278,6 +278,30 @@ async function run() {
     const labelUnfill = await page.$eval('#hydration-label', el => el.textContent);
     assert(labelUnfill.includes('1/8'), 'Label updates to 1/8 after unfilling');
 
+    // ===== Delete Meal =====
+    console.log('\n🗑️ Delete Meal');
+
+    // There should be 3 meals and a delete button on each
+    const deleteBtnsBefore = await page.$$eval('.meal-delete-btn', els => els.length);
+    assert(deleteBtnsBefore === 3, `Delete buttons present on all 3 meals (got ${deleteBtnsBefore})`);
+
+    // Click the delete button on the first meal
+    await page.click('.meal-delete-btn[data-index="0"]');
+    await wait(500);
+
+    const totalAfterDelete = await page.$eval('#total-meals', el => el.textContent);
+    assert(totalAfterDelete.includes('2'), 'Total meals decremented to 2 after delete');
+
+    const mealsAfterDelete = await page.$eval('#today-meals', el => el.textContent);
+    assert(!mealsAfterDelete.includes('Strawberry smoothie'), 'Deleted meal removed from today\'s list');
+
+    const plantsAfterDelete = await page.$$eval('#garden-plots .garden-plant', els => els.length);
+    assert(plantsAfterDelete === 2, `Garden has 2 plants after delete (got ${plantsAfterDelete})`);
+
+    // Check toast appeared
+    const toastText = await page.$eval('.toast', el => el.textContent);
+    assert(toastText.includes('Meal removed'), 'Toast notification shown after delete');
+
     // ===== Mood Check-in =====
     console.log('\n😊 Mood Check-in');
 

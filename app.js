@@ -186,13 +186,14 @@ function renderStats(data) {
     `🍽️ ${data.totalMeals} meal${data.totalMeals !== 1 ? 's' : ''} logged`;
 }
 
-function mealToHtml(meal) {
+function mealToHtml(meal, index, showDelete) {
   const icon = getMealIcon(meal.name);
   const time = new Date(meal.time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   const moodDisplay = meal.mood && MOOD_EMOJIS[meal.mood] ? `<span class="mood-emoji-display">${MOOD_EMOJIS[meal.mood]}</span>` : '';
+  const deleteBtn = showDelete ? `<button class="meal-delete-btn" data-index="${index}" aria-label="Remove meal" type="button">&times;</button>` : '';
   return `<span class="meal-icon">${icon}</span>
       <span>${escapeHtml(meal.name)}${moodDisplay}</span>
-      <span class="meal-time">${time}</span>`;
+      <span class="meal-time">${time}</span>${deleteBtn}`;
 }
 
 function renderTodayMeals(data) {
@@ -206,9 +207,45 @@ function renderTodayMeals(data) {
 
   list.innerHTML = meals.map((meal, i) =>
     `<li class="meal-item" style="animation-delay: ${i * 0.05}s">
-      ${mealToHtml(meal)}
+      ${mealToHtml(meal, i, true)}
     </li>`
   ).join('');
+
+  // Attach delete handlers
+  list.querySelectorAll('.meal-delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      deleteMeal(parseInt(btn.getAttribute('data-index'), 10));
+    });
+  });
+}
+
+function deleteMeal(index) {
+  const data = loadData();
+  const key = getDateKey();
+  const meals = data.meals[key];
+  if (!meals || index < 0 || index >= meals.length) return;
+
+  meals.splice(index, 1);
+  if (meals.length === 0) delete data.meals[key];
+
+  data.totalMeals = Math.max(0, data.totalMeals - 1);
+
+  if (data.gardenPlants.length > 0) {
+    data.gardenPlants.pop();
+  }
+
+  saveData(data);
+
+  renderStats(data);
+  renderTodayMeals(data);
+  renderGarden(data);
+  renderWeekly(data);
+  renderHistory(data);
+  renderDailyGoal(data);
+  renderAchievements(data, []);
+  renderGreeting(data);
+
+  showToast('Meal removed 🌿');
 }
 
 function getMealIcon(name) {

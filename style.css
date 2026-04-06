@@ -1052,6 +1052,31 @@ header h1 {
   to { transform: translateX(0); opacity: 1; }
 }
 
+.meal-delete-btn {
+  background: none;
+  border: none;
+  color: #BCAAA4;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  margin-left: 0.3rem;
+  line-height: 1;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  touch-action: manipulation;
+  flex-shrink: 0;
+}
+
+.meal-delete-btn:hover {
+  color: #8D6E63;
+  background: rgba(255, 107, 157, 0.1);
+}
+
+.meal-delete-btn:active {
+  color: #5D4037;
+  background: rgba(255, 107, 157, 0.18);
+}
+
 /* ===== Weekly Grid ===== */
 .weekly-grid {
   display: grid;
