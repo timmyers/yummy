@@ -1613,6 +1613,14 @@ function handlePostMeal(data, oldTotal) {
     celebrationDuration = 1800;
   }
 
+  // Smooth scroll to garden so the user sees their new plant grow
+  setTimeout(() => {
+    const gardenCard = document.querySelector('.garden-card');
+    if (gardenCard) {
+      gardenCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 1000);
+
   // Mood prompt appears after the celebration finishes (~2s buffer)
   setTimeout(() => {
     showMoodPrompt();
