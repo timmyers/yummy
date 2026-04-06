@@ -690,6 +690,27 @@ function renderInsights(data) {
     });
   }
 
+  // Eating window insight
+  if (daysWithMeals >= 3) {
+    let earliestSum = 0, latestSum = 0, windowDays = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = getDateKey(d);
+      const dayMeals = data.meals[key] || [];
+      if (dayMeals.length === 0) continue;
+      const hours = dayMeals.map(m => { const t = new Date(m.time); return t.getHours() + t.getMinutes() / 60; });
+      earliestSum += Math.min(...hours);
+      latestSum += Math.max(...hours);
+      windowDays++;
+    }
+    const fmtHour = h => { const hr = Math.round(h); const suffix = hr >= 12 ? 'pm' : 'am'; return (hr % 12 || 12) + suffix; };
+    insights.push({
+      text: `You usually eat between ${fmtHour(earliestSum / windowDays)} – ${fmtHour(latestSum / windowDays)} 🕐`,
+      style: 'lavender',
+    });
+  }
+
   if (insights.length === 0) {
     container.innerHTML = '<span class="insight-pill">Start logging meals to see your insights! ✨</span>';
     return;
