@@ -449,6 +449,16 @@ function renderGarden(data) {
     `;
   }
 
+  // Add decorative ground elements
+  plots.querySelectorAll('.garden-decor').forEach(el => el.remove());
+  [{x:12,e:'🌿'},{x:38,e:'🌿'},{x:65,e:'🌿'},{x:88,e:'🌿'}].forEach(d => {
+    const g = document.createElement('div');
+    g.className = 'garden-decor';
+    g.style.left = `${d.x}%`;
+    g.textContent = d.e;
+    plots.appendChild(g);
+  });
+
   plants.forEach((plant, i) => {
     const el = document.createElement('div');
     el.className = 'garden-plant';
