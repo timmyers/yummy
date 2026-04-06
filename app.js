@@ -105,6 +105,14 @@ function renderAffirmation() {
   if (el) el.textContent = getDailyAffirmation();
 }
 
+// ===== Haptic Feedback =====
+
+function haptic() {
+  try {
+    if (navigator.vibrate) navigator.vibrate(10);
+  } catch (_) { /* gracefully ignore */ }
+}
+
 // ===== Data Management =====
 
 function loadData() {
@@ -372,6 +380,7 @@ function renderAchievements(data, newlyUnlockedIds) {
 function showAchievementCelebration(achievementId) {
   const badge = ACHIEVEMENTS.find(b => b.id === achievementId);
   if (!badge) return;
+  haptic();
 
   // Create overlay appended to body so it doesn't affect page flow
   const overlay = document.createElement('div');
@@ -1530,6 +1539,7 @@ function initHydration(data) {
       }
 
       setHydrationCount(data, newCount);
+      haptic();
       renderHydration(data);
 
       if (newCount >= HYDRATION_GOAL && currentCount < HYDRATION_GOAL) {
@@ -1590,6 +1600,7 @@ function initMoodPrompt() {
   prompt.querySelectorAll('.mood-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const mood = btn.getAttribute('data-mood');
+      haptic();
       btn.classList.add('selected');
       saveMoodToLastMeal(mood);
       setTimeout(() => dismissMoodPrompt(), 300);
@@ -1749,6 +1760,7 @@ function init() {
     const preData = loadData();
     const oldTotal = preData.totalMeals || 0;
     const data = addMeal(val, preData);
+    haptic();
     input.value = '';
     input.focus();
 
@@ -1762,6 +1774,7 @@ function init() {
       const preData = loadData();
       const oldTotal = preData.totalMeals || 0;
       const data = addMeal(meal, preData);
+      haptic();
 
       handlePostMeal(data, oldTotal);
     });
