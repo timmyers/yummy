@@ -1710,6 +1710,92 @@ function handlePostMeal(data, oldTotal) {
 
 // ===== Event Handlers =====
 
+// ===== Meal Autocomplete =====
+
+function getMealSuggestions(data) {
+  const freq = {};
+  for (const key of Object.keys(data.meals)) {
+    const dayMeals = data.meals[key];
+    for (const meal of dayMeals) {
+      // Split combined meals (from 30-min grouping) into individual items
+      const parts = meal.name.split(', ');
+      for (const part of parts) {
+        const trimmed = part.trim();
+        if (!trimmed) continue;
+        freq[trimmed] = (freq[trimmed] || 0) + 1;
+      }
+    }
+  }
+  // Sort by frequency descending, then alphabetical
+  return Object.entries(freq)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([name]) => name);
+}
+
+function renderMealSuggestions(query, suggestions) {
+  const container = document.getElementById('meal-suggestions');
+  if (!container) return;
+
+  if (!query || query.length < 2) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const lower = query.toLowerCase();
+  const matches = suggestions.filter(s => s.toLowerCase().includes(lower)).slice(0, 5);
+
+  if (matches.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const items = matches.map(name => {
+    const icon = getMealIcon(name);
+    return `<li class="suggestion-item" data-meal="${name.replace(/"/g, '&quot;')}">
+      <span class="suggestion-icon">${icon}</span>
+      <span class="suggestion-name">${name}</span>
+    </li>`;
+  }).join('');
+
+  container.innerHTML = `<ul class="suggestion-list">${items}</ul>`;
+}
+
+function initMealAutocomplete() {
+  const input = document.getElementById('meal-input');
+  const container = document.getElementById('meal-suggestions');
+  if (!input || !container) return;
+
+  let suggestions = getMealSuggestions(loadData());
+
+  function hideSuggestions() {
+    container.innerHTML = '';
+  }
+
+  input.addEventListener('input', () => {
+    suggestions = getMealSuggestions(loadData());
+    renderMealSuggestions(input.value.trim(), suggestions);
+  });
+
+  input.addEventListener('blur', () => {
+    // Small delay so tap on suggestion registers before hiding
+    setTimeout(hideSuggestions, 200);
+  });
+
+  container.addEventListener('mousedown', (e) => {
+    const item = e.target.closest('.suggestion-item');
+    if (!item) return;
+    e.preventDefault(); // Prevent blur from firing first
+
+    const meal = item.getAttribute('data-meal');
+    input.value = meal;
+    hideSuggestions();
+
+    // Auto-submit
+    const form = document.getElementById('meal-form');
+    if (form) form.dispatchEvent(new Event('submit', { cancelable: true }));
+  });
+}
+
 function init() {
   const data = loadData();
 
@@ -1739,6 +1825,9 @@ function init() {
 
   // Share garden button
   document.getElementById('share-btn').addEventListener('click', shareGarden);
+
+  // Meal autocomplete
+  initMealAutocomplete();
 
   // Mood check-in
   initMoodPrompt();
@@ -1778,6 +1867,7 @@ function init() {
     const data = addMeal(val, preData);
     haptic();
     input.value = '';
+    document.getElementById('meal-suggestions').innerHTML = '';
     input.focus();
 
     handlePostMeal(data, oldTotal);

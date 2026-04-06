@@ -531,6 +531,60 @@ header h1 {
   opacity: 1;
 }
 
+/* Meal autocomplete suggestions */
+.meal-suggestions {
+  position: relative;
+  z-index: 10;
+}
+
+.meal-suggestions:empty {
+  display: none;
+}
+
+.meal-suggestions .suggestion-list {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  list-style: none;
+}
+
+.meal-suggestions .suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.95rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.meal-suggestions .suggestion-item:hover,
+.meal-suggestions .suggestion-item:active {
+  background: #FFF0F5;
+}
+
+.meal-suggestions .suggestion-item + .suggestion-item {
+  border-top: 1px solid rgba(255, 182, 193, 0.2);
+}
+
+.meal-suggestions .suggestion-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.meal-suggestions .suggestion-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Quick picks */
 .quick-picks {
   display: flex;
