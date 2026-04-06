@@ -73,10 +73,18 @@ async function run() {
   const page = await browser.newPage();
   await page.setViewport({ width: 414, height: 896 }); // iPhone-ish
 
+  // Helper: clear app state and reload for a clean slate
+  async function resetAppState() {
+    await page.evaluate(() => localStorage.clear());
+    await page.reload({ waitUntil: 'domcontentloaded' });
+  }
+
   try {
     // ===== Page Load =====
     console.log('📱 Page Load');
     await page.goto(BASE, { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => localStorage.clear());
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
     const title = await page.title();
     assert(title.includes('Yummy Garden'), 'Page title contains "Yummy Garden"');
@@ -113,7 +121,10 @@ async function run() {
 
     await page.type('#meal-input', 'Strawberry smoothie');
     await page.click('#plant-btn');
-    await wait(500);
+    await page.waitForFunction(
+      () => document.querySelector('#today-meals')?.textContent.includes('Strawberry smoothie'),
+      { timeout: 3000 }
+    );
 
     const meal1 = await page.$eval('#today-meals', el => el.textContent);
     assert(meal1.includes('Strawberry smoothie'), 'Typed meal appears in today\'s list');
@@ -139,7 +150,10 @@ async function run() {
     });
 
     await page.click('.quick-pick[data-meal="🫐 Blueberries"]');
-    await wait(500);
+    await page.waitForFunction(
+      () => document.querySelector('#today-meals')?.textContent.includes('Blueberries'),
+      { timeout: 3000 }
+    );
 
     const meal2 = await page.$eval('#today-meals', el => el.textContent);
     assert(meal2.includes('Blueberries'), 'Quick pick meal appears in today\'s list');
@@ -168,7 +182,10 @@ async function run() {
     });
 
     await page.click('.quick-pick[data-meal="🥭 Mango"]');
-    await wait(1000);
+    await page.waitForFunction(
+      () => document.querySelector('#total-meals')?.textContent.includes('3'),
+      { timeout: 3000 }
+    );
 
     const total3 = await page.$eval('#total-meals', el => el.textContent);
     assert(total3.includes('3'), 'Total meals is 3');
@@ -241,7 +258,10 @@ async function run() {
     console.log('\n📐 Responsive');
 
     await page.setViewport({ width: 375, height: 667 }); // iPhone SE
-    await wait(200);
+    await page.waitForFunction(
+      () => document.querySelector('#garden')?.offsetHeight > 0,
+      { timeout: 3000 }
+    );
     const smallGarden = await page.$eval('#garden', el => el.offsetHeight);
     assert(smallGarden > 0 && smallGarden <= 250, `Garden resizes on small screen (${smallGarden}px)`);
 
@@ -260,7 +280,10 @@ async function run() {
     console.log('\n🔄 Reload Persistence');
 
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await wait(300);
+    await page.waitForFunction(
+      () => document.querySelector('#total-meals')?.textContent.includes('3'),
+      { timeout: 3000 }
+    );
 
     const reloadTotal = await page.$eval('#total-meals', el => el.textContent);
     assert(reloadTotal.includes('3'), 'Data persists after reload');
@@ -282,7 +305,10 @@ async function run() {
 
     // Tap the 3rd water drop (index 2) — should fill drops 0, 1, 2
     await page.click('.water-drop[data-index="2"]');
-    await wait(300);
+    await page.waitForFunction(
+      () => document.querySelectorAll('#hydration-drops .water-drop.filled').length === 3,
+      { timeout: 3000 }
+    );
 
     const dropsAfter = await page.$$eval('#hydration-drops .water-drop.filled', els => els.length);
     assert(dropsAfter === 3, `Tapping 3rd drop fills 3 drops (got ${dropsAfter})`);
@@ -292,7 +318,10 @@ async function run() {
 
     // Tap a filled drop to unfill — tap index 1, should set count to 1
     await page.click('.water-drop[data-index="1"]');
-    await wait(300);
+    await page.waitForFunction(
+      () => document.querySelectorAll('#hydration-drops .water-drop.filled').length === 1,
+      { timeout: 3000 }
+    );
 
     const dropsUnfill = await page.$$eval('#hydration-drops .water-drop.filled', els => els.length);
     assert(dropsUnfill === 1, `Tapping filled drop unfills correctly (got ${dropsUnfill})`);
@@ -309,7 +338,10 @@ async function run() {
 
     // Click the delete button on the first meal
     await page.click('.meal-delete-btn[data-index="0"]');
-    await wait(500);
+    await page.waitForFunction(
+      () => document.querySelector('#total-meals')?.textContent.includes('2'),
+      { timeout: 3000 }
+    );
 
     const totalAfterDelete = await page.$eval('#total-meals', el => el.textContent);
     assert(totalAfterDelete.includes('2'), 'Total meals decremented to 2 after delete');
@@ -328,21 +360,25 @@ async function run() {
     console.log('\n😊 Mood Check-in');
 
     // Clear localStorage and reload to get a clean state for mood tests
-    await page.evaluate(() => localStorage.clear());
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await wait(300);
+    await resetAppState();
 
     // Log a meal and check that mood prompt appears (delayed after celebration)
     await page.type('#meal-input', 'Avocado toast');
     await page.click('#plant-btn');
-    await wait(3500);
+    await page.waitForFunction(
+      () => !document.querySelector('#mood-prompt')?.classList.contains('hidden'),
+      { timeout: 8000 }
+    );
 
     const moodPromptVisible = await page.$eval('#mood-prompt', el => !el.classList.contains('hidden'));
     assert(moodPromptVisible, 'Mood prompt appears after logging a meal');
 
     // Tap a mood emoji and check it dismisses
     await page.click('.mood-btn[data-mood="great"]');
-    await wait(500);
+    await page.waitForFunction(
+      () => document.querySelector('#mood-prompt')?.classList.contains('hidden'),
+      { timeout: 3000 }
+    );
 
     const moodPromptHidden = await page.$eval('#mood-prompt', el => el.classList.contains('hidden'));
     assert(moodPromptHidden, 'Mood prompt dismisses after selecting a mood');
@@ -353,13 +389,19 @@ async function run() {
 
     // Test mood prompt with quick pick and skip (delayed after celebration)
     await page.click('.quick-pick[data-meal="🍓 Strawberries"]');
-    await wait(3500);
+    await page.waitForFunction(
+      () => !document.querySelector('#mood-prompt')?.classList.contains('hidden'),
+      { timeout: 8000 }
+    );
 
     const moodPromptVisible2 = await page.$eval('#mood-prompt', el => !el.classList.contains('hidden'));
     assert(moodPromptVisible2, 'Mood prompt appears after quick pick meal');
 
-    await page.click('#mood-skip');
-    await wait(300);
+    await page.evaluate(() => document.getElementById('mood-skip')?.click());
+    await page.waitForFunction(
+      () => document.querySelector('#mood-prompt')?.classList.contains('hidden'),
+      { timeout: 5000 }
+    );
 
     const moodPromptHidden2 = await page.$eval('#mood-prompt', el => el.classList.contains('hidden'));
     assert(moodPromptHidden2, 'Mood prompt dismisses after clicking skip');
@@ -367,19 +409,23 @@ async function run() {
     // ===== Meal Dedup/Grouping =====
     console.log('\n🍱 Meal Dedup/Grouping');
 
-    // Clear state and reload for a clean test
-    await page.evaluate(() => localStorage.clear());
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await wait(300);
+    // Clean slate for dedup test
+    await resetAppState();
 
     // Log first meal
     await page.type('#meal-input', 'Strawberry smoothie');
     await page.click('#plant-btn');
-    await wait(500);
+    await page.waitForFunction(
+      () => document.querySelector('#today-meals')?.textContent.includes('Strawberry smoothie'),
+      { timeout: 3000 }
+    );
 
     // Log second meal immediately (within 30-min window, no time aging)
     await page.click('.quick-pick[data-meal="🫐 Blueberries"]');
-    await wait(500);
+    await page.waitForFunction(
+      () => document.querySelector('#today-meals')?.textContent.includes('Blueberries'),
+      { timeout: 3000 }
+    );
 
     const dedupTotal = await page.$eval('#total-meals', el => el.textContent);
     assert(dedupTotal.includes('1'), 'Two items within 30-min window count as 1 meal');
@@ -398,13 +444,19 @@ async function run() {
     assert(changelogHiddenBefore, 'Changelog is hidden initially');
 
     await page.click('#version-btn');
-    await wait(200);
+    await page.waitForFunction(
+      () => !document.querySelector('#changelog')?.classList.contains('hidden'),
+      { timeout: 3000 }
+    );
 
     const changelogVisibleAfter = await page.$eval('#changelog', el => !el.classList.contains('hidden'));
     assert(changelogVisibleAfter, 'Changelog visible after tapping version button');
 
     await page.click('#changelog-close');
-    await wait(200);
+    await page.waitForFunction(
+      () => document.querySelector('#changelog')?.classList.contains('hidden'),
+      { timeout: 3000 }
+    );
 
     const changelogHiddenAfterClose = await page.$eval('#changelog', el => el.classList.contains('hidden'));
     assert(changelogHiddenAfterClose, 'Changelog hidden after tapping close button');
@@ -422,7 +474,10 @@ async function run() {
 
     // Click to open
     await page.click('.collapsible-heading[data-section="achievements"]');
-    await wait(200);
+    await page.waitForFunction(
+      () => document.querySelector('.collapsible-heading[data-section="achievements"]')?.classList.contains('open'),
+      { timeout: 3000 }
+    );
 
     const openedAfterClick = await page.$eval('.collapsible-heading[data-section="achievements"]',
       el => el.classList.contains('open'));
