@@ -1887,5 +1887,34 @@ function init() {
   });
 }
 
+// ===== First-visit welcome overlay =====
+function showWelcomeIfNew() {
+  if (localStorage.getItem(STORAGE_KEY)) return;
+  const overlay = document.getElementById('welcome-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('hidden');
+
+  function dismiss() {
+    if (overlay.classList.contains('hidden')) return;
+    overlay.classList.add('fade-out');
+    setTimeout(() => overlay.classList.add('hidden'), 400);
+    clearTimeout(autoTimer);
+  }
+
+  // Also dismiss immediately when user starts interacting
+  function quickDismiss() {
+    overlay.classList.add('hidden');
+    clearTimeout(autoTimer);
+    document.removeEventListener('keydown', quickDismiss);
+  }
+  document.addEventListener('keydown', quickDismiss, { once: true });
+
+  document.getElementById('welcome-dismiss').addEventListener('click', dismiss);
+  const autoTimer = setTimeout(dismiss, 5000);
+}
+
 // Start the app
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  showWelcomeIfNew();
+});

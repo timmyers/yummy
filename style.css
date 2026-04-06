@@ -1822,3 +1822,41 @@ header h1 {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 182, 193, 0.6);
 }
+
+/* Welcome overlay (first visit) */
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.welcome-overlay.hidden { display: none; }
+.welcome-overlay.fade-out { opacity: 0; }
+.welcome-content {
+  pointer-events: auto;
+  text-align: center;
+  background: white;
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 8px 40px rgba(255, 107, 157, 0.25);
+  animation: celebrationBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.welcome-emoji { font-size: 3.5rem; }
+.welcome-content h2 { font-size: 1.3rem; color: var(--pink); margin: 0.5rem 0 0.3rem; }
+.welcome-content p { font-size: 0.95rem; color: #888; margin-bottom: 1.2rem; }
+.welcome-btn {
+  background: linear-gradient(135deg, var(--pink), var(--peach));
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 0.6rem 1.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
