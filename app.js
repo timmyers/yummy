@@ -1842,6 +1842,12 @@ function initMealAutocomplete() {
 function init() {
   const data = loadData();
 
+  // Nighttime visual shift after 9pm
+  if (new Date().getHours() >= 21) {
+    document.getElementById('app').classList.add('nighttime');
+    document.querySelector('.sun-face').textContent = '🌙';
+  }
+
   createBgElements();
   renderAffirmation();
   renderGreeting(data);

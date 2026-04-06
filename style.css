@@ -1894,3 +1894,24 @@ header h1 {
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ===== Nighttime Visual Shift (after 9pm) ===== */
+#app.nighttime { --shadow: rgba(100, 80, 120, 0.15); }
+#app.nighttime ~ body,
+body:has(#app.nighttime) {
+  background: linear-gradient(180deg, #C5CAE9 0%, #E8D5E0 30%, #F5EDE8 60%, #E8F0E8 100%);
+}
+#app.nighttime .bg-float { opacity: 0.1; }
+#app.nighttime .rainbow { opacity: 0.25; }
+#app.nighttime #garden.season-spring {
+  background: linear-gradient(180deg, #5C6BC0 0%, #7986CB 40%, #6B9B6B 60%, #5A8A5A 65%, #4A6E3A 100%);
+}
+#app.nighttime #garden.season-summer {
+  background: linear-gradient(180deg, #3F51B5 0%, #5C6BC0 35%, #4A8A4A 58%, #3E7E3E 65%, #2E6E2E 100%);
+}
+#app.nighttime #garden.season-autumn {
+  background: linear-gradient(180deg, #7E57C2 0%, #B39DDB 35%, #A08840 58%, #907840 65%, #6B5010 100%);
+}
+#app.nighttime #garden.season-winter {
+  background: linear-gradient(180deg, #4A4A8A 0%, #7B8CB0 35%, #D0D0E0 58%, #E0E0E8 65%, #EEEEEE 100%);
+}
