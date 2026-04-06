@@ -364,6 +364,73 @@ async function run() {
     const moodPromptHidden2 = await page.$eval('#mood-prompt', el => el.classList.contains('hidden'));
     assert(moodPromptHidden2, 'Mood prompt dismisses after clicking skip');
 
+    // ===== Meal Dedup/Grouping =====
+    console.log('\n🍱 Meal Dedup/Grouping');
+
+    // Clear state and reload for a clean test
+    await page.evaluate(() => localStorage.clear());
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await wait(300);
+
+    // Log first meal
+    await page.type('#meal-input', 'Strawberry smoothie');
+    await page.click('#plant-btn');
+    await wait(500);
+
+    // Log second meal immediately (within 30-min window, no time aging)
+    await page.click('.quick-pick[data-meal="🫐 Blueberries"]');
+    await wait(500);
+
+    const dedupTotal = await page.$eval('#total-meals', el => el.textContent);
+    assert(dedupTotal.includes('1'), 'Two items within 30-min window count as 1 meal');
+
+    const dedupMealText = await page.$eval('#today-meals', el => el.textContent);
+    assert(dedupMealText.includes('Strawberry smoothie') && dedupMealText.includes('Blueberries'),
+      'Grouped meal shows both items combined');
+
+    const dedupPlants = await page.$$eval('#garden-plots .garden-plant', els => els.length);
+    assert(dedupPlants === 1, `Only 1 plant in garden for grouped meal (got ${dedupPlants})`);
+
+    // ===== Changelog Toggle =====
+    console.log('\n📋 Changelog Toggle');
+
+    const changelogHiddenBefore = await page.$eval('#changelog', el => el.classList.contains('hidden'));
+    assert(changelogHiddenBefore, 'Changelog is hidden initially');
+
+    await page.click('#version-btn');
+    await wait(200);
+
+    const changelogVisibleAfter = await page.$eval('#changelog', el => !el.classList.contains('hidden'));
+    assert(changelogVisibleAfter, 'Changelog visible after tapping version button');
+
+    await page.click('#changelog-close');
+    await wait(200);
+
+    const changelogHiddenAfterClose = await page.$eval('#changelog', el => el.classList.contains('hidden'));
+    assert(changelogHiddenAfterClose, 'Changelog hidden after tapping close button');
+
+    // ===== Collapsible Sections =====
+    console.log('\n📂 Collapsible Sections');
+
+    const achievementsHeading = await page.$('.collapsible-heading[data-section="achievements"]');
+    assert(achievementsHeading !== null, 'Achievements collapsible heading exists');
+
+    // Initially collapsed (no "open" class)
+    const initiallyOpen = await page.$eval('.collapsible-heading[data-section="achievements"]',
+      el => el.classList.contains('open'));
+    assert(!initiallyOpen, 'Achievements section starts collapsed');
+
+    // Click to open
+    await page.click('.collapsible-heading[data-section="achievements"]');
+    await wait(200);
+
+    const openedAfterClick = await page.$eval('.collapsible-heading[data-section="achievements"]',
+      el => el.classList.contains('open'));
+    assert(openedAfterClick, 'Achievements section opens after click');
+
+    const bodyOpen = await page.$eval('#achievements-body', el => el.classList.contains('open'));
+    assert(bodyOpen, 'Achievements body has open class after toggle');
+
   } catch (err) {
     console.error('\n💥 Test error:', err.message);
     failed++;
