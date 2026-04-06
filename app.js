@@ -114,6 +114,8 @@ function loadData() {
 }
 
 function saveData(data) {
+  if (!data.meals) data.meals = {};
+  if (!data.gardenPlants) data.gardenPlants = [];
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
@@ -765,7 +767,8 @@ function renderAccordion(data) {
 // ===== Collapsible Sections =====
 
 function initCollapsibleSections(data) {
-  const stored = JSON.parse(localStorage.getItem('yummy-collapsed-sections') || '{}');
+  let stored = {};
+  try { stored = JSON.parse(localStorage.getItem('yummy-collapsed-sections') || '{}'); } catch (_) {}
   document.querySelectorAll('.collapsible-heading').forEach(heading => {
     const section = heading.dataset.section;
     const body = document.getElementById(section + '-body');
@@ -783,7 +786,8 @@ function initCollapsibleSections(data) {
       const opening = !heading.classList.contains('open');
       heading.classList.toggle('open');
       body.classList.toggle('open');
-      const state = JSON.parse(localStorage.getItem('yummy-collapsed-sections') || '{}');
+      let state = {};
+      try { state = JSON.parse(localStorage.getItem('yummy-collapsed-sections') || '{}'); } catch (_) {}
       state[section] = opening;
       localStorage.setItem('yummy-collapsed-sections', JSON.stringify(state));
     });
@@ -1303,7 +1307,7 @@ function renderNotifToggle() {
   const intervalSelect = document.getElementById('notif-interval');
   const statusEl = document.getElementById('notif-status');
 
-  if (settings.enabled && Notification.permission === 'granted') {
+  if (settings.enabled && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
     toggle.classList.add('active');
     intervalRow.classList.remove('hidden');
     statusEl.textContent = `Reminders every ${settings.intervalHours} hours 🌸`;
@@ -1322,7 +1326,7 @@ function initNotifications() {
   const settings = getNotifSettings();
 
   // Re-register SW if notifications were previously enabled
-  if (settings.enabled && Notification.permission === 'granted') {
+  if (settings.enabled && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
     registerServiceWorker().then((reg) => {
       if (reg && reg.active) {
         reg.active.postMessage({
@@ -1583,6 +1587,7 @@ function handlePostMeal(data, oldTotal) {
 
 function getMealSuggestions(data) {
   const freq = {};
+  if (!data.meals) return [];
   for (const key of Object.keys(data.meals)) {
     const dayMeals = data.meals[key];
     for (const meal of dayMeals) {
